@@ -3,11 +3,8 @@
 <head>
   <meta charset="UTF-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-  <title>Coin Change Visualizer — BCS 309</title>
+  <title>Coin Change Problem — Interactive Learning Tool | BCS 309</title>
   <style>
-    /* =============================================
-       ROOT VARIABLES & RESET
-    ============================================= */
     :root {
       --bg:          #0f0f0f;
       --panel:       #1a1a1a;
@@ -19,13 +16,12 @@
       --accent2:     #03dac6;
       --danger:      #cf6679;
       --warn:        #ffb74d;
-      --cell-def:    #2a2a2a;
+      --green:       #4caf50;
       --cell-active: #03dac6;
       --cell-cmp:    #cf6679;
       --cell-done:   #6200ea;
       --cell-final:  #bb86fc;
       --code-hl:     #2d2040;
-      --green:       #4caf50;
     }
     *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
     body {
@@ -37,9 +33,7 @@
       flex-direction: column;
     }
 
-    /* =============================================
-       TOP HEADER BAR
-    ============================================= */
+    /* ── HEADER ── */
     header {
       background: var(--panel);
       border-bottom: 1px solid var(--border);
@@ -50,24 +44,82 @@
       flex-wrap: wrap;
       gap: 8px;
     }
-    header h1 {
-      font-size: 1.1rem;
-      color: var(--accent);
-      font-weight: 700;
-      letter-spacing: 0.5px;
-    }
+    header h1 { font-size: 1.05rem; color: var(--accent); font-weight: 700; }
     header h1 span { color: var(--text); font-weight: 400; }
-    .student-info {
-      font-size: 0.78rem;
-      color: var(--muted);
-      text-align: right;
-      line-height: 1.5;
-    }
+    .student-info { font-size: 0.75rem; color: var(--muted); text-align: right; line-height: 1.5; }
     .student-info strong { color: var(--accent2); }
 
-    /* =============================================
-       MAIN TWO-COLUMN LAYOUT
-    ============================================= */
+    /* ── HERO INTRO BANNER ── */
+    .hero {
+      background: linear-gradient(135deg, #1a0a2e 0%, #0a1a2e 50%, #0a2e1a 100%);
+      border-bottom: 1px solid var(--border);
+      padding: 24px 28px;
+    }
+    .hero-inner {
+      max-width: 1100px;
+      margin: 0 auto;
+    }
+    .hero h2 {
+      font-size: 1.5rem;
+      color: var(--accent);
+      margin-bottom: 8px;
+      font-weight: 800;
+    }
+    .hero-subtitle {
+      font-size: 0.95rem;
+      color: #ccc;
+      line-height: 1.7;
+      margin-bottom: 18px;
+      max-width: 780px;
+    }
+    .hero-steps {
+      display: flex;
+      flex-wrap: wrap;
+      gap: 12px;
+      margin-bottom: 18px;
+    }
+    .hero-step {
+      background: rgba(255,255,255,0.05);
+      border: 1px solid var(--border);
+      border-radius: 8px;
+      padding: 10px 16px;
+      display: flex;
+      align-items: flex-start;
+      gap: 10px;
+      flex: 1;
+      min-width: 180px;
+    }
+    .hero-step-num {
+      background: var(--accent);
+      color: #000;
+      font-weight: 800;
+      font-size: 0.85rem;
+      width: 24px;
+      height: 24px;
+      border-radius: 50%;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      flex-shrink: 0;
+    }
+    .hero-step-text { font-size: 0.8rem; color: #ccc; line-height: 1.5; }
+    .hero-step-text strong { color: var(--accent2); }
+    .hero-clo-row {
+      display: flex;
+      flex-wrap: wrap;
+      gap: 8px;
+    }
+    .hero-clo {
+      background: rgba(3,218,198,0.08);
+      border: 1px solid rgba(3,218,198,0.25);
+      border-radius: 6px;
+      padding: 6px 14px;
+      font-size: 0.75rem;
+      color: var(--accent2);
+    }
+    .hero-clo strong { color: #fff; }
+
+    /* ── MAIN LAYOUT ── */
     .main-container {
       display: flex;
       flex: 1;
@@ -94,9 +146,7 @@
       gap: 16px;
     }
 
-    /* =============================================
-       SECTION CARDS
-    ============================================= */
+    /* ── CARDS ── */
     .card {
       background: var(--panel2);
       border: 1px solid var(--border);
@@ -112,15 +162,8 @@
       margin-bottom: 10px;
     }
 
-    /* =============================================
-       INPUT FIELDS
-    ============================================= */
-    label {
-      display: block;
-      font-size: 0.75rem;
-      color: var(--muted);
-      margin-bottom: 4px;
-    }
+    /* ── INPUTS ── */
+    label { display: block; font-size: 0.75rem; color: var(--muted); margin-bottom: 4px; }
     input[type="text"], input[type="number"] {
       width: 100%;
       background: #111;
@@ -132,33 +175,17 @@
       outline: none;
       transition: border-color 0.2s;
     }
-    input[type="text"]:focus, input[type="number"]:focus {
-      border-color: var(--accent);
-    }
-
-    /* Coin type count row */
+    input[type="text"]:focus, input[type="number"]:focus { border-color: var(--accent); }
     .coin-count-row {
-      display: flex;
-      align-items: center;
-      gap: 8px;
-      margin-bottom: 10px;
+      display: flex; align-items: center; gap: 8px; margin-bottom: 10px;
     }
     .coin-count-row label { margin: 0; white-space: nowrap; flex-shrink: 0; }
     .coin-count-row input { width: 70px; }
     .coin-count-row button {
-      background: var(--accent);
-      color: #000;
-      border: none;
-      border-radius: 5px;
-      padding: 6px 12px;
-      font-size: 0.78rem;
-      font-weight: 700;
-      cursor: pointer;
-      white-space: nowrap;
+      background: var(--accent); color: #000; border: none; border-radius: 5px;
+      padding: 6px 12px; font-size: 0.78rem; font-weight: 700; cursor: pointer;
     }
     .coin-count-row button:hover { opacity: 0.85; }
-
-    /* Dynamic coin value inputs grid */
     #coin-values-grid {
       display: grid;
       grid-template-columns: repeat(auto-fill, minmax(70px, 1fr));
@@ -169,21 +196,11 @@
     .coin-val-wrap label { font-size: 0.68rem; color: var(--accent); margin: 0; }
     .coin-val-wrap input { text-align: center; padding: 5px; }
 
-    /* =============================================
-       BUTTONS
-    ============================================= */
-    .btn-row {
-      display: flex;
-      flex-wrap: wrap;
-      gap: 6px;
-    }
+    /* ── BUTTONS ── */
+    .btn-row { display: flex; flex-wrap: wrap; gap: 6px; }
     button {
-      border: none;
-      border-radius: 5px;
-      padding: 7px 13px;
-      font-size: 0.8rem;
-      font-weight: 600;
-      cursor: pointer;
+      border: none; border-radius: 5px; padding: 7px 13px;
+      font-size: 0.8rem; font-weight: 600; cursor: pointer;
       transition: opacity 0.15s, transform 0.1s;
     }
     button:hover:not(:disabled) { opacity: 0.85; transform: translateY(-1px); }
@@ -195,381 +212,250 @@
     .btn-danger    { background: var(--danger);   color: #fff; }
     .btn-teal      { background: var(--accent2);  color: #000; }
     .preset-btn {
-      background: #2a2a2a;
-      color: var(--accent2);
-      border: 1px solid var(--border);
-      font-size: 0.75rem;
-      padding: 5px 10px;
+      background: #2a2a2a; color: var(--accent2);
+      border: 1px solid var(--border); font-size: 0.75rem; padding: 5px 10px;
     }
     .preset-btn:hover:not(:disabled) { background: #333; border-color: var(--accent2); }
 
-    /* =============================================
-       SPEED SLIDER
-    ============================================= */
-    .speed-row {
-      display: flex;
-      align-items: center;
-      gap: 8px;
-      font-size: 0.8rem;
-    }
-    input[type="range"] {
-      flex: 1;
-      accent-color: var(--accent);
-    }
+    /* ── SPEED SLIDER ── */
+    .speed-row { display: flex; align-items: center; gap: 8px; font-size: 0.8rem; }
+    input[type="range"] { flex: 1; accent-color: var(--accent); }
 
-    /* =============================================
-       STATUS GRID
-    ============================================= */
-    .status-grid {
-      display: grid;
-      grid-template-columns: 1fr 1fr;
-      gap: 6px;
-    }
+    /* ── STATUS GRID ── */
+    .status-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 6px; }
     .stat-box {
-      background: #111;
-      border: 1px solid var(--border);
-      border-radius: 5px;
-      padding: 7px 10px;
+      background: #111; border: 1px solid var(--border);
+      border-radius: 5px; padding: 7px 10px;
     }
     .stat-label { font-size: 0.65rem; color: var(--muted); text-transform: uppercase; letter-spacing: 0.5px; }
     .stat-val   { font-size: 1rem; font-weight: 700; color: var(--accent2); margin-top: 2px; }
 
-    /* =============================================
-       PSEUDOCODE BLOCK
-    ============================================= */
+    /* ── PSEUDOCODE ── */
     .pseudo-block {
-      background: #111;
-      border: 1px solid var(--border);
-      border-radius: 6px;
-      padding: 10px 14px;
-      font-family: 'Courier New', monospace;
-      font-size: 0.8rem;
-      line-height: 2;
-      display: flex;
-      flex-direction: column;
+      background: #111; border: 1px solid var(--border); border-radius: 6px;
+      padding: 10px 14px; font-family: 'Courier New', monospace;
+      font-size: 0.8rem; line-height: 2; display: flex; flex-direction: column;
     }
     .pseudo-line {
-      padding: 1px 6px;
-      border-radius: 3px;
-      position: relative;
-      transition: background 0.2s;
-      white-space: pre;
+      padding: 1px 6px; border-radius: 3px; position: relative;
+      transition: background 0.2s; white-space: pre;
     }
-    .pseudo-line.hl {
-      background: var(--code-hl);
-      color: var(--accent);
-    }
+    .pseudo-line.hl { background: var(--code-hl); color: var(--accent); }
     .pseudo-line .tooltip {
-      display: none;
-      position: absolute;
-      left: 100%;
-      top: 0;
-      background: #333;
-      color: #ccc;
-      font-size: 0.72rem;
-      padding: 4px 8px;
-      border-radius: 4px;
-      white-space: nowrap;
-      z-index: 10;
-      margin-left: 8px;
+      display: none; position: absolute; left: 100%; top: 0;
+      background: #333; color: #ccc; font-size: 0.72rem; padding: 4px 8px;
+      border-radius: 4px; white-space: nowrap; z-index: 10; margin-left: 8px;
       border: 1px solid var(--border);
     }
     .pseudo-line:hover .tooltip { display: block; }
 
-    /* =============================================
-       EXPLANATION BOX
-    ============================================= */
+    /* ── EXPLANATION BOX ── */
     #explanation-box {
-      background: #111;
-      border: 1px solid var(--border);
-      border-radius: 6px;
-      padding: 12px 14px;
-      font-size: 0.85rem;
-      line-height: 1.6;
-      min-height: 50px;
-      color: var(--text);
+      background: #111; border: 1px solid var(--border); border-radius: 6px;
+      padding: 12px 14px; font-size: 0.85rem; line-height: 1.6;
+      min-height: 50px; color: var(--text);
     }
 
-    /* =============================================
-       DP TABLE SVG WRAPPER
-    ============================================= */
-    #dp-svg-wrap {
-      overflow-x: auto;
-      padding-bottom: 6px;
-    }
+    /* ── SVG WRAPPERS ── */
+    #dp-svg-wrap { overflow-x: auto; padding-bottom: 6px; }
+    #tree-svg-wrap { overflow-x: auto; overflow-y: auto; max-height: 360px; padding-bottom: 6px; }
 
-    /* =============================================
-       RECURSION TREE SVG WRAPPER
-    ============================================= */
-    #tree-svg-wrap {
-      overflow-x: auto;
-      overflow-y: auto;
-      max-height: 340px;
-      padding-bottom: 6px;
-    }
-
-    /* =============================================
-       HISTORY TABLE
-    ============================================= */
+    /* ── HISTORY TABLE ── */
     .history-wrap {
-      overflow-y: auto;
-      max-height: 220px;
-      border: 1px solid var(--border);
-      border-radius: 5px;
+      overflow-y: auto; max-height: 220px;
+      border: 1px solid var(--border); border-radius: 5px;
     }
-    #history-table {
-      width: 100%;
-      border-collapse: collapse;
-      font-size: 0.75rem;
-    }
+    #history-table { width: 100%; border-collapse: collapse; font-size: 0.75rem; }
     #history-table th {
-      background: #111;
-      color: var(--muted);
-      padding: 6px 8px;
-      text-align: left;
-      position: sticky;
-      top: 0;
-      font-size: 0.68rem;
-      text-transform: uppercase;
-      letter-spacing: 0.5px;
+      background: #111; color: var(--muted); padding: 6px 8px; text-align: left;
+      position: sticky; top: 0; font-size: 0.68rem; text-transform: uppercase; letter-spacing: 0.5px;
     }
-    #history-table td {
-      padding: 5px 8px;
-      border-top: 1px solid #1e1e1e;
-      cursor: pointer;
-    }
+    #history-table td { padding: 5px 8px; border-top: 1px solid #1e1e1e; cursor: pointer; }
     #history-table tr:hover td { background: #2a2a2a; }
     #history-table tr.active-row td { background: #2d2040; }
 
-    /* =============================================
-       CLO STATS
-    ============================================= */
-    .clo-grid {
-      display: grid;
-      grid-template-columns: 1fr 1fr 1fr 1fr;
-      gap: 6px;
-    }
-    .clo-stat {
-      background: #111;
-      border: 1px solid var(--border);
-      border-radius: 5px;
-      padding: 8px;
-      text-align: center;
-    }
+    /* ── CLO STATS ── */
+    .clo-grid { display: grid; grid-template-columns: 1fr 1fr 1fr 1fr; gap: 6px; }
+    .clo-stat { background: #111; border: 1px solid var(--border); border-radius: 5px; padding: 8px; text-align: center; }
     .clo-num { font-size: 1.2rem; font-weight: 700; color: var(--accent); }
     .clo-lbl { font-size: 0.62rem; color: var(--muted); margin-top: 2px; }
 
-    /* =============================================
-       COMPARISON BOXES
-    ============================================= */
-    .compare-row {
-      display: grid;
-      grid-template-columns: 1fr 1fr;
-      gap: 10px;
-      margin-top: 10px;
-    }
+    /* ── COMPARISON ── */
+    .compare-row { display: grid; grid-template-columns: 1fr 1fr; gap: 10px; margin-top: 10px; }
     .compare-box {
-      background: #111;
-      border: 1px solid var(--border);
-      border-radius: 6px;
-      padding: 10px;
-      text-align: center;
+      background: #111; border: 1px solid var(--border);
+      border-radius: 6px; padding: 10px; text-align: center;
     }
     .result-coins { font-size: 0.85rem; color: var(--text); margin: 6px 0; word-break: break-all; }
     .result-count { font-size: 1.8rem; font-weight: 700; }
     #comparison-conclusion {
-      margin-top: 10px;
-      background: #111;
-      border: 1px solid var(--border);
-      border-radius: 6px;
-      padding: 10px 14px;
-      font-size: 0.82rem;
-      line-height: 1.6;
+      margin-top: 10px; background: #111; border: 1px solid var(--border);
+      border-radius: 6px; padding: 10px 14px; font-size: 0.82rem; line-height: 1.6;
     }
 
-    /* =============================================
-       COLOR LEGEND
-    ============================================= */
-    .legend {
-      display: flex;
-      flex-wrap: wrap;
-      gap: 10px;
-    }
-    .legend-item {
-      display: flex;
-      align-items: center;
-      gap: 6px;
-      font-size: 0.75rem;
-      color: var(--muted);
-    }
-    .legend-dot {
-      width: 14px;
-      height: 14px;
-      border-radius: 3px;
-      flex-shrink: 0;
-    }
+    /* ── COLOR LEGEND ── */
+    .legend { display: flex; flex-wrap: wrap; gap: 10px; }
+    .legend-item { display: flex; align-items: center; gap: 6px; font-size: 0.75rem; color: var(--muted); }
+    .legend-dot { width: 14px; height: 14px; border-radius: 3px; flex-shrink: 0; }
 
-    /* =============================================
-       EDUCATIONAL TEXT SECTIONS
-    ============================================= */
+    /* ── EDUCATIONAL SECTIONS ── */
     .edu-section {
-      background: var(--panel2);
-      border: 1px solid var(--border);
-      border-radius: 8px;
-      overflow: hidden;
+      background: var(--panel2); border: 1px solid var(--border); border-radius: 8px; overflow: hidden;
     }
     .edu-section summary {
-      padding: 12px 16px;
-      font-size: 0.9rem;
-      font-weight: 700;
-      cursor: pointer;
-      color: var(--accent);
-      list-style: none;
-      display: flex;
-      align-items: center;
-      gap: 8px;
-      user-select: none;
+      padding: 12px 16px; font-size: 0.9rem; font-weight: 700; cursor: pointer;
+      color: var(--accent); list-style: none; display: flex; align-items: center; gap: 8px; user-select: none;
     }
     .edu-section summary::-webkit-details-marker { display: none; }
-    .edu-section summary::before {
-      content: '▶';
-      font-size: 0.7rem;
-      color: var(--muted);
-      transition: transform 0.2s;
-    }
+    .edu-section summary::before { content: '▶'; font-size: 0.7rem; color: var(--muted); transition: transform 0.2s; }
     .edu-section[open] summary::before { transform: rotate(90deg); }
     .edu-body {
-      padding: 14px 18px;
-      border-top: 1px solid var(--border);
-      display: flex;
-      flex-direction: column;
-      gap: 14px;
+      padding: 16px 20px; border-top: 1px solid var(--border);
+      display: flex; flex-direction: column; gap: 18px;
     }
-    .edu-body h3 {
-      font-size: 0.85rem;
-      color: var(--accent2);
-      margin-bottom: 6px;
-      font-weight: 700;
-    }
-    .edu-body p {
-      font-size: 0.82rem;
-      line-height: 1.7;
-      color: #ccc;
-    }
-    .edu-body ol, .edu-body ul {
-      padding-left: 18px;
-      font-size: 0.82rem;
-      line-height: 1.9;
-      color: #ccc;
-    }
+    .edu-body h3 { font-size: 0.88rem; color: var(--accent2); margin-bottom: 6px; font-weight: 700; }
+    .edu-body p { font-size: 0.83rem; line-height: 1.75; color: #ccc; }
+    .edu-body ol, .edu-body ul { padding-left: 20px; font-size: 0.83rem; line-height: 2; color: #ccc; }
+    .edu-body li { margin-bottom: 2px; }
     .edu-body code {
-      background: #111;
-      border: 1px solid var(--border);
-      border-radius: 3px;
-      padding: 1px 5px;
-      font-family: 'Courier New', monospace;
-      font-size: 0.82rem;
-      color: var(--accent);
+      background: #111; border: 1px solid var(--border); border-radius: 3px;
+      padding: 1px 5px; font-family: 'Courier New', monospace; font-size: 0.82rem; color: var(--accent);
     }
-    .edu-body .complexity-table {
-      width: 100%;
-      border-collapse: collapse;
-      font-size: 0.82rem;
-    }
+    .edu-body .complexity-table { width: 100%; border-collapse: collapse; font-size: 0.82rem; }
     .edu-body .complexity-table th {
-      background: #111;
-      color: var(--muted);
-      padding: 6px 10px;
-      text-align: left;
-      border: 1px solid var(--border);
-      font-size: 0.72rem;
-      text-transform: uppercase;
+      background: #111; color: var(--muted); padding: 7px 10px; text-align: left;
+      border: 1px solid var(--border); font-size: 0.72rem; text-transform: uppercase;
     }
-    .edu-body .complexity-table td {
-      padding: 6px 10px;
-      border: 1px solid var(--border);
-      color: #ccc;
-    }
+    .edu-body .complexity-table td { padding: 7px 10px; border: 1px solid var(--border); color: #ccc; }
     .edu-body .complexity-table td:first-child { color: var(--accent2); font-weight: 600; }
     .highlight-box {
-      background: #1a1a2e;
-      border-left: 3px solid var(--accent);
-      padding: 10px 14px;
-      border-radius: 0 6px 6px 0;
-      font-size: 0.84rem;
-      line-height: 1.7;
-      color: #ccc;
+      background: #1a1a2e; border-left: 3px solid var(--accent);
+      padding: 12px 16px; border-radius: 0 6px 6px 0; font-size: 0.84rem; line-height: 1.8; color: #ccc;
     }
     .warn-box {
-      background: #1a1200;
-      border-left: 3px solid var(--warn);
-      padding: 10px 14px;
-      border-radius: 0 6px 6px 0;
-      font-size: 0.84rem;
-      line-height: 1.7;
-      color: #ccc;
+      background: #1a1200; border-left: 3px solid var(--warn);
+      padding: 12px 16px; border-radius: 0 6px 6px 0; font-size: 0.84rem; line-height: 1.8; color: #ccc;
     }
+    .success-box {
+      background: #0a1a0a; border-left: 3px solid var(--green);
+      padding: 12px 16px; border-radius: 0 6px 6px 0; font-size: 0.84rem; line-height: 1.8; color: #ccc;
+    }
+    .info-box {
+      background: #0a1a2a; border-left: 3px solid var(--accent2);
+      padding: 12px 16px; border-radius: 0 6px 6px 0; font-size: 0.84rem; line-height: 1.8; color: #ccc;
+    }
+    /* Worked example trace table */
+    .trace-table { width: 100%; border-collapse: collapse; font-size: 0.8rem; margin-top: 8px; }
+    .trace-table th {
+      background: #111; color: var(--muted); padding: 6px 8px; text-align: center;
+      border: 1px solid var(--border); font-size: 0.7rem;
+    }
+    .trace-table td { padding: 6px 8px; border: 1px solid var(--border); text-align: center; color: #ccc; }
+    .trace-table td.updated { color: var(--green); font-weight: 700; }
+    .trace-table td.active  { background: #1a1a2e; color: var(--accent); font-weight: 700; }
+    /* Challenge box */
+    .challenge-box {
+      background: #1a0a2e; border: 1px dashed var(--accent);
+      border-radius: 8px; padding: 14px 18px;
+    }
+    .challenge-box h4 { color: var(--accent); font-size: 0.85rem; margin-bottom: 8px; }
+    .challenge-box p  { font-size: 0.82rem; color: #ccc; line-height: 1.7; }
+    .challenge-box ol { font-size: 0.82rem; color: #ccc; line-height: 2; padding-left: 18px; }
 
-    /* =============================================
-       RESPONSIVE
-    ============================================= */
+    /* ── RESPONSIVE ── */
     @media (max-width: 980px) {
       .main-container { flex-direction: column; }
       .controls-panel { width: 100%; min-width: unset; border-right: none; border-bottom: 1px solid var(--border); }
       .clo-grid { grid-template-columns: 1fr 1fr; }
       .compare-row { grid-template-columns: 1fr; }
+      .hero-steps { flex-direction: column; }
     }
   </style>
 </head>
 <body>
 
-<!-- =============================================
-     HEADER
-============================================= -->
+<!-- ── HEADER ── -->
 <header>
-  <h1>Coin Change Visualizer &nbsp;<span>— BCS 309 Algorithms I</span></h1>
+  <h1>Coin Change Problem <span>&#8212; Interactive Learning Tool | BCS 309 Algorithms I</span></h1>
   <div class="student-info">
-    <strong>Maryam Alyaseen</strong><br/>
-    ID: 20220002536
+    <strong>Maryam Alyaseen</strong><br/>ID: 20220002536
   </div>
 </header>
 
-<!-- =============================================
-     MAIN LAYOUT
-============================================= -->
+<!-- ══════════════════════════════════════════
+     HERO INTRO BANNER
+     This section makes the tool's purpose
+     immediately clear to any visitor.
+══════════════════════════════════════════ -->
+<div class="hero">
+  <div class="hero-inner">
+    <h2>&#127981; What is This Tool?</h2>
+    <p class="hero-subtitle">
+      This is an <strong>interactive algorithm visualizer</strong> for the <strong>Coin Change Problem</strong> — a classic computer science problem used to teach <strong>Dynamic Programming (DP)</strong>.
+      You can enter any coin denominations and any target amount, then watch the algorithm solve the problem step by step, with every decision explained in plain English.
+      No prior knowledge is required — the educational sections below the tool explain everything from scratch.
+    </p>
+
+    <div class="hero-steps">
+      <div class="hero-step">
+        <div class="hero-step-num">1</div>
+        <div class="hero-step-text"><strong>Choose a preset</strong> or enter your own coins and target amount on the left panel.</div>
+      </div>
+      <div class="hero-step">
+        <div class="hero-step-num">2</div>
+        <div class="hero-step-text"><strong>Click "Build Steps"</strong> to prepare the animation, then click <strong>"Play"</strong> to watch the algorithm run.</div>
+      </div>
+      <div class="hero-step">
+        <div class="hero-step-num">3</div>
+        <div class="hero-step-text"><strong>Watch the DP Table</strong> fill in cell by cell. The Step Explanation box tells you exactly what is happening at each moment.</div>
+      </div>
+      <div class="hero-step">
+        <div class="hero-step-num">4</div>
+        <div class="hero-step-text"><strong>Read the educational sections</strong> below the tool to understand the theory, complexity, and why Greedy fails.</div>
+      </div>
+    </div>
+
+    <div class="hero-clo-row">
+      <div class="hero-clo"><strong>CLO-1:</strong> Time &amp; Space Complexity Analysis</div>
+      <div class="hero-clo"><strong>CLO-2:</strong> Sorting Optimization (Early Exit)</div>
+      <div class="hero-clo"><strong>CLO-3:</strong> DP vs Greedy Paradigm Comparison</div>
+      <div class="hero-clo"><strong>Best Preset to Start:</strong> "Greedy Fails (6)"</div>
+    </div>
+  </div>
+</div>
+
+<!-- ── MAIN TWO-COLUMN LAYOUT ── -->
 <div class="main-container">
 
-  <!-- ==================== LEFT: CONTROLS ==================== -->
+  <!-- ══ LEFT: CONTROLS ══ -->
   <div class="controls-panel">
 
     <!-- Input -->
     <div class="card">
-      <div class="card-title">Input</div>
+      <div class="card-title">&#9881; Input — Your Coin Problem</div>
+      <p style="font-size:0.75rem;color:var(--muted);margin-bottom:10px;">Set the number of coin types, enter each coin's value, and set the target amount. The Recursion Tree updates live as you type.</p>
 
-      <!-- Step 1: Number of coin types -->
       <div class="coin-count-row">
         <label>Number of coin types:</label>
         <input type="number" id="num-coins" value="3" min="1" max="10" style="width:70px;" />
         <button onclick="generateCoinInputs()">Set</button>
       </div>
 
-      <!-- Step 2: Dynamic coin value fields -->
-      <label>Coin Values:</label>
+      <label>Coin Values (enter each denomination):</label>
       <div id="coin-values-grid"></div>
 
-      <!-- Step 3: Target amount -->
-      <label style="margin-top:4px;">Target Amount</label>
-      <input type="number" id="amount-input" value="6" min="0" max="50" />
+      <label style="margin-top:4px;">Target Amount (how much to make):</label>
+      <input type="number" id="amount-input" value="6" min="0" max="50" oninput="liveUpdateTree()" />
 
-      <!-- Hidden legacy input kept for compatibility with runComparison() -->
       <input type="text" id="coins-input" value="1, 3, 4" style="display:none;" />
     </div>
 
     <!-- Presets -->
     <div class="card">
-      <div class="card-title">Preset Examples</div>
+      <div class="card-title">&#9733; Preset Examples</div>
+      <p style="font-size:0.72rem;color:var(--muted);margin-bottom:8px;">Click any preset to instantly load coins and amount. Start with <strong style="color:var(--warn)">Greedy Fails</strong> to see the most important example.</p>
       <div class="btn-row">
-        <button class="preset-btn" onclick="loadPreset([1,3,4],6)">Greedy Fails (6)</button>
+        <button class="preset-btn" onclick="loadPreset([1,3,4],6)">&#9888; Greedy Fails (6)</button>
         <button class="preset-btn" onclick="loadPreset([1,5,6,9],11)">Classic DP (11)</button>
         <button class="preset-btn" onclick="loadPreset([1,2,5],11)">Standard (11)</button>
         <button class="preset-btn" onclick="loadPreset([2],3)">Impossible</button>
@@ -580,7 +466,8 @@
 
     <!-- Playback Controls -->
     <div class="card">
-      <div class="card-title">Playback Controls</div>
+      <div class="card-title">&#9654; Playback Controls</div>
+      <p style="font-size:0.72rem;color:var(--muted);margin-bottom:8px;">First click <strong>Build Steps</strong>, then use <strong>Step</strong> for frame-by-frame or <strong>Play</strong> for automatic animation.</p>
       <div class="btn-row">
         <button class="btn-primary"   id="btn-build"  onclick="buildSteps()">Build Steps</button>
         <button class="btn-secondary" id="btn-step"   onclick="stepForward()" disabled>Step &#9654;</button>
@@ -599,7 +486,7 @@
 
     <!-- Status -->
     <div class="card">
-      <div class="card-title">Status</div>
+      <div class="card-title">&#128200; Live Statistics</div>
       <div class="status-grid">
         <div class="stat-box"><div class="stat-label">Step</div><div class="stat-val" id="stat-step">0 / 0</div></div>
         <div class="stat-box"><div class="stat-label">Status</div><div class="stat-val" id="stat-status">Idle</div></div>
@@ -612,56 +499,68 @@
 
     <!-- Pseudocode -->
     <div class="card">
-      <div class="card-title">Pseudocode &#8212; DP Algorithm</div>
+      <div class="card-title">&#128196; Pseudocode &#8212; DP Algorithm</div>
+      <p style="font-size:0.72rem;color:var(--muted);margin-bottom:8px;">The highlighted line shows which part of the code is currently executing. Hover any line for an explanation.</p>
       <div class="pseudo-block" id="pseudo-block">
-        <span class="pseudo-line" data-line="0">CoinChangeDP(coins, amount):<span class="tooltip">Function entry point</span></span>
-        <span class="pseudo-line" data-line="1">  sort coins ascending<span class="tooltip">CLO-2: Enables early-exit optimization</span></span>
-        <span class="pseudo-line" data-line="2">  dp[0..amount] = infinity<span class="tooltip">Initialize table -- no solution known yet</span></span>
-        <span class="pseudo-line" data-line="3">  dp[0] = 0<span class="tooltip">Base case: 0 coins needed for amount 0</span></span>
-        <span class="pseudo-line" data-line="4">  for i = 1 to amount:<span class="tooltip">Outer loop: solve each sub-amount</span></span>
-        <span class="pseudo-line" data-line="5">    for each coin c in coins:<span class="tooltip">Inner loop: try every coin</span></span>
-        <span class="pseudo-line" data-line="6">      if c &gt; i: break<span class="tooltip">Early exit -- coin too large (sorting benefit)</span></span>
-        <span class="pseudo-line" data-line="7">      if dp[i-c] + 1 &lt; dp[i]:<span class="tooltip">Can we do better using this coin?</span></span>
-        <span class="pseudo-line" data-line="8">        dp[i] = dp[i-c] + 1<span class="tooltip">Update with better solution</span></span>
-        <span class="pseudo-line" data-line="9">  return dp[amount]<span class="tooltip">Final answer</span></span>
+        <span class="pseudo-line" data-line="0">CoinChangeDP(coins, amount):<span class="tooltip">Function entry point — takes coin list and target</span></span>
+        <span class="pseudo-line" data-line="1">  sort coins ascending<span class="tooltip">CLO-2: Sorting enables early-exit optimization</span></span>
+        <span class="pseudo-line" data-line="2">  dp[0..amount] = infinity<span class="tooltip">Initialize — infinity means "no solution found yet"</span></span>
+        <span class="pseudo-line" data-line="3">  dp[0] = 0<span class="tooltip">Base case: 0 coins needed to make amount 0</span></span>
+        <span class="pseudo-line" data-line="4">  for i = 1 to amount:<span class="tooltip">Outer loop: solve every sub-amount from 1 to W</span></span>
+        <span class="pseudo-line" data-line="5">    for each coin c in coins:<span class="tooltip">Inner loop: try every coin denomination</span></span>
+        <span class="pseudo-line" data-line="6">      if c &gt; i: break<span class="tooltip">Early exit — coin too large, all remaining are too (sorted)</span></span>
+        <span class="pseudo-line" data-line="7">      if dp[i-c] + 1 &lt; dp[i]:<span class="tooltip">Can we reach amount i better by using coin c?</span></span>
+        <span class="pseudo-line" data-line="8">        dp[i] = dp[i-c] + 1<span class="tooltip">Yes — update dp[i] with the improved solution</span></span>
+        <span class="pseudo-line" data-line="9">  return dp[amount]<span class="tooltip">Final answer: minimum coins for the target amount</span></span>
       </div>
     </div>
 
   </div><!-- end controls-panel -->
 
-  <!-- ==================== RIGHT: VISUALIZATION ==================== -->
+  <!-- ══ RIGHT: VISUALIZATION ══ -->
   <div class="viz-panel">
 
     <!-- Step Explanation -->
     <div class="card">
-      <div class="card-title">Step Explanation</div>
-      <div id="explanation-box">Welcome! Enter coins and a target amount, then click <strong>Build Steps</strong> to begin the visualization.</div>
+      <div class="card-title">&#128172; Step-by-Step Explanation</div>
+      <div id="explanation-box">
+        Welcome! This box will explain every single step of the algorithm in plain English as it runs.
+        Start by clicking a <strong>Preset</strong> on the left, then click <strong>Build Steps</strong>, then <strong>Play</strong>.
+      </div>
     </div>
 
     <!-- Color Legend -->
     <div class="card">
-      <div class="card-title">Color Legend</div>
+      <div class="card-title">&#127912; Color Legend &#8212; What Each Color Means</div>
       <div class="legend">
-        <div class="legend-item"><div class="legend-dot" style="background:#2a2a2a;border:1px solid #555;"></div> Unsolved (inf)</div>
+        <div class="legend-item"><div class="legend-dot" style="background:#2a2a2a;border:1px solid #555;"></div> Unsolved (infinity)</div>
         <div class="legend-item"><div class="legend-dot" style="background:var(--cell-active);"></div> Currently Solving</div>
         <div class="legend-item"><div class="legend-dot" style="background:var(--cell-cmp);"></div> Checking Remainder</div>
-        <div class="legend-item"><div class="legend-dot" style="background:var(--cell-done);"></div> Cell Updated</div>
+        <div class="legend-item"><div class="legend-dot" style="background:var(--cell-done);"></div> Just Updated</div>
         <div class="legend-item"><div class="legend-dot" style="background:var(--cell-final);"></div> Final Answer</div>
         <div class="legend-item"><div class="legend-dot" style="background:#1a3a1a;border:1px solid var(--green);"></div> Solved Cell</div>
       </div>
     </div>
 
-    <!-- DP Table Visualization -->
+    <!-- DP Table -->
     <div class="card">
-      <div class="card-title">DP Table &#8212; dp[0 &#8230; amount]</div>
+      <div class="card-title">&#128202; DP Table &#8212; dp[0 &#8230; amount]</div>
+      <p style="font-size:0.75rem;color:var(--muted);margin-bottom:8px;">
+        Each cell <code>dp[i]</code> stores the minimum number of coins needed to make exactly amount <code>i</code>.
+        Watch it fill from left to right as the algorithm solves each sub-amount.
+      </p>
       <div id="dp-svg-wrap"><div id="dp-svg"></div></div>
     </div>
 
     <!-- Recursion Tree -->
     <div class="card">
-      <div class="card-title">Recursion Tree &#8212; Why DP? (Overlapping Subproblems)</div>
+      <div class="card-title">&#127795; Recursion Tree &#8212; Why Naive Recursion is Slow</div>
       <p style="font-size:0.75rem;color:var(--muted);margin-bottom:8px;">
-        This tree is generated from your <strong>current input</strong>. Orange-dashed boxes mark subproblems computed more than once in naive recursion. DP stores each answer once, eliminating all redundant calls.
+        This tree shows what a <strong>naive recursive</strong> approach would do for your current input.
+        Each node is a subproblem (an amount to solve). Branches show which coin was subtracted.
+        <strong style="color:var(--warn)">Orange-dashed nodes</strong> are subproblems computed more than once &#8212; these are <strong>overlapping subproblems</strong>.
+        DP eliminates all redundancy by storing each answer exactly once.
+        <em>The tree updates automatically as you change the input.</em>
       </p>
       <div id="tree-svg-wrap">
         <svg id="tree-svg" width="560" height="220" viewBox="0 0 560 220"></svg>
@@ -670,18 +569,18 @@
 
     <!-- History Table -->
     <div class="card">
-      <div class="card-title">Step History (click any row to jump)</div>
+      <div class="card-title">&#128203; Step History &#8212; Click any row to jump to that step</div>
       <div class="history-wrap">
         <table id="history-table">
-          <thead><tr><th>#</th><th>Action</th><th>Amount</th><th>Coin</th><th>dp[i]</th><th>Description</th></tr></thead>
+          <thead><tr><th>#</th><th>Action</th><th>Amount i</th><th>Coin c</th><th>dp[i]</th><th>What Happened</th></tr></thead>
           <tbody id="history-tbody"></tbody>
         </table>
       </div>
     </div>
 
-    <!-- CLO-1: Complexity Analysis -->
+    <!-- CLO-1 -->
     <div class="card">
-      <div class="card-title">CLO-1 &#8212; Complexity Analysis</div>
+      <div class="card-title">CLO-1 &#8212; Complexity Analysis (Live Counters)</div>
       <div class="clo-grid">
         <div class="clo-stat"><div class="clo-num" id="clo-ops">0</div><div class="clo-lbl">Actual Operations</div></div>
         <div class="clo-stat"><div class="clo-num" id="clo-max">0</div><div class="clo-lbl">Theoretical O(n&#183;W)</div></div>
@@ -689,29 +588,32 @@
         <div class="clo-stat"><div class="clo-num" id="clo-space">0</div><div class="clo-lbl">Space Used O(W)</div></div>
       </div>
       <div style="margin-top:12px;">
-        <div class="card-title" style="margin-bottom:6px;">Growth Chart &#8212; Actual vs Theoretical</div>
+        <div class="card-title" style="margin-bottom:6px;">Growth Chart &#8212; Actual vs Theoretical Operations</div>
         <div style="overflow-x:auto;">
           <svg id="growth-svg" width="500" height="130" viewBox="0 0 500 130"></svg>
         </div>
       </div>
     </div>
 
-    <!-- CLO-3: Greedy vs DP Comparison -->
+    <!-- CLO-3 -->
     <div class="card">
       <div class="card-title">CLO-3 &#8212; Greedy vs DP Comparison</div>
       <p style="font-size:0.8rem;color:var(--muted);margin-bottom:10px;">
-        Uses the current coins &amp; amount. Best demonstrated with the <strong>"Greedy Fails (6)"</strong> preset.
+        Click the button below to run both algorithms on your current input and compare their results side by side.
+        Use the <strong style="color:var(--warn)">"Greedy Fails (6)"</strong> preset for the most dramatic demonstration.
       </p>
-      <button class="btn-teal" onclick="runComparison()">Run Comparison Now</button>
+      <button class="btn-teal" onclick="runComparison()">&#9654; Run Comparison Now</button>
       <div class="compare-row" id="compare-row" style="display:none;">
         <div class="compare-box">
-          <h4 style="color:var(--warn);">Greedy Algorithm</h4>
+          <h4 style="color:var(--warn);">&#9888; Greedy Algorithm</h4>
+          <div style="font-size:0.7rem;color:var(--muted);margin-bottom:4px;">Picks largest coin first, no backtracking</div>
           <div class="result-coins" id="greedy-coins">&#8212;</div>
           <div class="result-count" id="greedy-count" style="color:var(--warn);">&#8212;</div>
           <div style="font-size:0.7rem;color:var(--muted);">coins used</div>
         </div>
         <div class="compare-box">
-          <h4 style="color:var(--accent2);">Dynamic Programming</h4>
+          <h4 style="color:var(--accent2);">&#10003; Dynamic Programming</h4>
+          <div style="font-size:0.7rem;color:var(--muted);margin-bottom:4px;">Builds optimal solution from subproblems</div>
           <div class="result-coins" id="dp-coins">&#8212;</div>
           <div class="result-count" id="dp-count" style="color:var(--accent2);">&#8212;</div>
           <div style="font-size:0.7rem;color:var(--muted);">coins used</div>
@@ -720,166 +622,312 @@
       <div id="comparison-conclusion" style="display:none;"></div>
     </div>
 
-    <!-- =============================================
-         EDUCATIONAL TEXT SECTION (instructor style)
-    ============================================= -->
+    <!-- ══════════════════════════════════════════
+         EDUCATIONAL SECTIONS — Self-Study Content
+    ══════════════════════════════════════════ -->
 
-    <!-- Overview -->
+    <!-- SECTION 1: What is the Problem? -->
     <details class="edu-section" open>
-      <summary>&#128216; Coin Change Problem &#8212; Overview</summary>
+      <summary>&#128216; Section 1 &#8212; What is the Coin Change Problem?</summary>
       <div class="edu-body">
         <div>
-          <h3>Problem Definition</h3>
-          <p>Given a set of coin denominations <code>coins[]</code> and a target <code>amount</code>, find the <strong>minimum number of coins</strong> needed to make exactly that amount. You may use each coin denomination an unlimited number of times.</p>
-          <p style="margin-top:8px;"><strong>Input:</strong> A list of coin values (e.g., <code>[1, 3, 4]</code>) and a target integer (e.g., <code>6</code>).<br/>
-          <strong>Output:</strong> The minimum number of coins, or <em>"Impossible"</em> if no combination can reach the target.</p>
+          <h3>Problem Statement</h3>
+          <p>You are given a list of coin denominations (for example, coins worth 1, 3, and 4 units) and a target amount (for example, 6). Your goal is to find the <strong>minimum number of coins</strong> from the list that add up to exactly the target amount. You may use each denomination as many times as you want.</p>
+          <p style="margin-top:8px;"><strong>Formal definition:</strong> Given <code>coins[] = [c1, c2, ..., cn]</code> and integer <code>amount W</code>, find the smallest integer <code>k</code> such that some combination of k coins from the list sums to W. If no such combination exists, return "Impossible".</p>
         </div>
+
         <div class="highlight-box">
-          <strong>Worked Example:</strong> Coins = <code>[1, 3, 4]</code>, Amount = <code>6</code><br/>
-          Possible combinations: <code>1+1+1+1+1+1</code> (6 coins), <code>4+1+1</code> (3 coins), <code>3+3</code> (2 coins).<br/>
-          <strong>Optimal answer: 2 coins</strong> (using two 3-cent coins).
+          <strong>Worked Example — Step by Step:</strong><br/><br/>
+          Coins = <code>[1, 3, 4]</code>, Amount = <code>6</code><br/><br/>
+          Let's list all possible combinations that sum to 6:<br/>
+          &#8226; <code>1+1+1+1+1+1</code> = 6 coins<br/>
+          &#8226; <code>4+1+1</code> = 3 coins<br/>
+          &#8226; <code>3+1+1+1</code> = 4 coins<br/>
+          &#8226; <code>3+3</code> = <strong>2 coins &#8592; This is the minimum!</strong><br/><br/>
+          The answer is <strong>2 coins</strong> (two 3-unit coins).
         </div>
+
         <div>
-          <h3>Why This Problem Matters</h3>
-          <p>The Coin Change Problem is a canonical example of <strong>Dynamic Programming</strong>. It appears in real-world systems such as ATM cash dispensing, currency exchange, and resource allocation. It is also the classic counterexample that proves <strong>Greedy algorithms are not always optimal</strong> for arbitrary coin sets.</p>
+          <h3>Why is This Problem Important?</h3>
+          <p>The Coin Change Problem is one of the most famous problems in computer science because it perfectly illustrates two key ideas: <strong>Optimal Substructure</strong> and <strong>Overlapping Subproblems</strong>. These two properties are what make a problem solvable by Dynamic Programming. The problem also appears in real life — ATM machines, vending machines, and currency exchange systems all need to solve a version of this problem.</p>
+          <p style="margin-top:8px;">More importantly for this course, it is the classic example that <strong>proves Greedy algorithms are not always correct</strong>. Even though Greedy is faster, it gives the wrong answer for certain coin sets. DP always gives the correct answer.</p>
+        </div>
+
+        <div>
+          <h3>Input and Output</h3>
+          <table class="complexity-table">
+            <thead><tr><th>Component</th><th>Description</th><th>Example</th></tr></thead>
+            <tbody>
+              <tr><td>coins[]</td><td>List of available coin denominations</td><td>[1, 3, 4]</td></tr>
+              <tr><td>amount W</td><td>The target value to reach</td><td>6</td></tr>
+              <tr><td>Output</td><td>Minimum number of coins, or "Impossible"</td><td>2 (using 3+3)</td></tr>
+            </tbody>
+          </table>
+        </div>
+
+        <div class="challenge-box">
+          <h4>&#127919; Try It Yourself — Before Using the Tool</h4>
+          <p>Before clicking Play, try to solve this by hand:</p>
+          <ol>
+            <li>Coins = <code>[1, 5, 6, 9]</code>, Amount = <code>11</code>. What is the minimum? (Hint: it is not 9+1+1)</li>
+            <li>Coins = <code>[2]</code>, Amount = <code>3</code>. Is this possible?</li>
+            <li>Coins = <code>[25, 10, 5, 1]</code>, Amount = <code>41</code>. What is the minimum?</li>
+          </ol>
+          <p style="margin-top:8px;color:var(--muted);font-size:0.78rem;">Load each preset and run the tool to check your answers.</p>
         </div>
       </div>
     </details>
 
-    <!-- DP Explanation -->
+    <!-- SECTION 2: How DP Works -->
     <details class="edu-section" open>
-      <summary>&#9881;&#65039; Dynamic Programming &#8212; How It Works</summary>
+      <summary>&#9881;&#65039; Section 2 &#8212; How Dynamic Programming Solves It</summary>
       <div class="edu-body">
         <div>
-          <h3>Core Idea</h3>
-          <p>Instead of solving the big problem directly, DP breaks it into smaller overlapping subproblems. We build a table <code>dp[]</code> where <code>dp[i]</code> stores the minimum coins needed to make amount <code>i</code>. We solve <code>dp[1]</code>, then <code>dp[2]</code>, all the way up to <code>dp[amount]</code>, reusing previously computed answers.</p>
+          <h3>The Core Idea: Build Up from Small Answers</h3>
+          <p>Dynamic Programming solves the Coin Change Problem by breaking it into smaller subproblems. Instead of asking "how do I make 11?", we first ask "how do I make 1?", then "how do I make 2?", and so on, all the way up to 11. Each answer is stored in a table so we never compute the same thing twice.</p>
+          <p style="margin-top:8px;">We create an array <code>dp[]</code> where <code>dp[i]</code> = the minimum number of coins to make amount <code>i</code>. We fill this array from left to right, and every time we compute <code>dp[i]</code>, we look back at previously computed values to find the best option.</p>
         </div>
+
         <div>
-          <h3>How It Works &#8212; Step by Step</h3>
+          <h3>The DP Recurrence Formula</h3>
+          <div class="highlight-box">
+            <strong>dp[i] = min( dp[i - c] + 1 ) for all coins c where c &lt;= i</strong><br/><br/>
+            In plain English: "The minimum coins to make amount <code>i</code> equals one coin (the coin we just used) plus the minimum coins to make the remainder <code>i - c</code>."
+          </div>
+        </div>
+
+        <div>
+          <h3>Full Worked Example &#8212; Trace Through the Table</h3>
+          <p>Let's trace the algorithm for Coins = <code>[1, 3, 4]</code>, Amount = <code>6</code>:</p>
+          <table class="trace-table">
+            <thead>
+              <tr><th>Amount i</th><th>Try coin 1</th><th>Try coin 3</th><th>Try coin 4</th><th>dp[i] Result</th><th>Best coin used</th></tr>
+            </thead>
+            <tbody>
+              <tr><td>0</td><td colspan="3" style="color:var(--green);">Base case</td><td class="updated">0</td><td>&#8212; (none needed)</td></tr>
+              <tr><td>1</td><td class="active">dp[0]+1 = 1</td><td>3 &gt; 1, skip</td><td>4 &gt; 1, skip</td><td class="updated">1</td><td>coin 1</td></tr>
+              <tr><td>2</td><td class="active">dp[1]+1 = 2</td><td>3 &gt; 2, skip</td><td>4 &gt; 2, skip</td><td class="updated">2</td><td>coin 1</td></tr>
+              <tr><td>3</td><td>dp[2]+1 = 3</td><td class="active">dp[0]+1 = 1</td><td>4 &gt; 3, skip</td><td class="updated">1</td><td>coin 3</td></tr>
+              <tr><td>4</td><td>dp[3]+1 = 2</td><td>dp[1]+1 = 2</td><td class="active">dp[0]+1 = 1</td><td class="updated">1</td><td>coin 4</td></tr>
+              <tr><td>5</td><td>dp[4]+1 = 2</td><td class="active">dp[2]+1 = 3</td><td>dp[1]+1 = 2</td><td class="updated">2</td><td>coin 1 (or 4)</td></tr>
+              <tr><td>6</td><td>dp[5]+1 = 3</td><td class="active">dp[3]+1 = 2</td><td>dp[2]+1 = 3</td><td class="updated">2</td><td>coin 3</td></tr>
+            </tbody>
+          </table>
+          <p style="margin-top:8px;font-size:0.8rem;color:var(--muted);">Final answer: <strong style="color:var(--green);">dp[6] = 2</strong>. The optimal solution is two 3-unit coins.</p>
+        </div>
+
+        <div>
+          <h3>The Two Key Properties That Make DP Work</h3>
+          <div class="info-box">
+            <strong>1. Optimal Substructure:</strong><br/>
+            The optimal solution to a big problem contains optimal solutions to its sub-problems. If the best way to make 6 uses a 3-coin, then the best way to make the remaining 3 must also be optimal. If it were not, we could replace it with a better solution and get a better answer for 6 &#8212; contradicting our assumption.<br/><br/>
+            <strong>2. Overlapping Subproblems:</strong><br/>
+            The same sub-amounts are needed by many different larger amounts. For example, <code>dp[2]</code> is used when computing <code>dp[3]</code>, <code>dp[5]</code>, and <code>dp[6]</code>. DP computes <code>dp[2]</code> only once and reuses it, unlike naive recursion which recomputes it every time.
+          </div>
+        </div>
+
+        <div>
+          <h3>Step-by-Step Algorithm</h3>
           <ol>
-            <li>Sort the coins in ascending order (enables early-exit optimization).</li>
-            <li>Create array <code>dp[0..amount]</code>, fill everything with <code>infinity</code> (unknown).</li>
-            <li>Set <code>dp[0] = 0</code> &#8212; base case: zero coins needed for zero amount.</li>
-            <li>For each amount <code>i</code> from 1 to target, try every coin <code>c</code>.</li>
-            <li>If <code>c &gt; i</code>, break the inner loop (coin is too large &#8212; sorting benefit).</li>
-            <li>If <code>dp[i&#8722;c] + 1 &lt; dp[i]</code>, update <code>dp[i]</code> with the better value.</li>
-            <li>After all loops, <code>dp[amount]</code> holds the optimal answer.</li>
+            <li><strong>Sort the coins</strong> in ascending order (this enables the early-exit optimization).</li>
+            <li><strong>Create the dp array</strong> of size <code>amount + 1</code> and fill it with infinity (meaning "no solution found yet").</li>
+            <li><strong>Set dp[0] = 0</strong> — the base case: you need zero coins to make zero amount.</li>
+            <li><strong>Outer loop:</strong> For each amount <code>i</code> from 1 to the target amount, do the following:</li>
+            <li><strong>Inner loop:</strong> For each coin <code>c</code> in the sorted coins list:</li>
+            <li>If <code>c &gt; i</code>, break the inner loop (coin is too large; all remaining coins are also too large because the list is sorted).</li>
+            <li>If <code>dp[i - c] + 1 &lt; dp[i]</code>, update <code>dp[i]</code> with the better value.</li>
+            <li><strong>Return dp[amount]</strong> as the final answer. If it is still infinity, the answer is "Impossible".</li>
           </ol>
         </div>
-        <div class="highlight-box">
-          <strong>Key Insight &#8212; Optimal Substructure:</strong><br/>
-          The optimal solution to amount <code>i</code> contains the optimal solution to amount <code>i&#8722;c</code>. This is what makes DP correct: every sub-answer we store is itself optimal, so building on it guarantees the final answer is also optimal.
-        </div>
+      </div>
+    </details>
+
+    <!-- SECTION 3: Recursion Tree Explained -->
+    <details class="edu-section" open>
+      <summary>&#127795; Section 3 &#8212; The Recursion Tree: Why Naive Recursion Fails</summary>
+      <div class="edu-body">
         <div>
-          <h3>Overlapping Subproblems</h3>
-          <p>A naive recursive approach would recompute the same sub-amounts many times (see the Recursion Tree above). For example, computing the answer for amount 4 might require computing amount 2 multiple times across different branches. DP stores each answer exactly once, reducing exponential time to polynomial time.</p>
+          <h3>What is Naive Recursion?</h3>
+          <p>A naive recursive approach would try every possible combination of coins by branching out at each step. For each amount, it tries subtracting every coin and recursively solves the smaller amount. This is correct but extremely slow.</p>
+        </div>
+
+        <div class="warn-box">
+          <strong>The Problem &#8212; Exponential Time:</strong><br/><br/>
+          For Coins = <code>[1, 3, 4]</code> and Amount = <code>6</code>, the naive recursion tree has dozens of nodes. Many of those nodes represent the <strong>same amount being solved multiple times</strong>. For example, the subproblem "how do I make 2?" might appear in 5 different branches of the tree.<br/><br/>
+          As the amount grows, the number of repeated computations grows exponentially. The time complexity of naive recursion is <strong>O(n^W)</strong> &#8212; "n to the power of W" &#8212; which becomes impossibly slow for even moderate inputs (e.g., amount = 30 with 3 coins = 3^30 = over 200 billion operations).
+        </div>
+
+        <div>
+          <h3>How to Read the Recursion Tree (in This Tool)</h3>
+          <ul>
+            <li><strong>Purple nodes</strong> &#8212; a recursive call to solve a sub-amount. The number inside is the amount being solved.</li>
+            <li><strong>Green nodes</strong> &#8212; base case. Amount = 0, so 0 more coins are needed. Recursion stops here.</li>
+            <li><strong>Pink nodes with orange dashes</strong> &#8212; this amount has already appeared elsewhere in the tree. This is an <strong>overlapping subproblem</strong>. In naive recursion, this would be recomputed from scratch. DP stores the answer the first time and reuses it.</li>
+            <li><strong>Edge labels</strong> &#8212; the coin that was subtracted to go from the parent node to the child node.</li>
+          </ul>
+        </div>
+
+        <div>
+          <h3>How DP Eliminates the Redundancy</h3>
+          <p>Dynamic Programming solves each sub-amount exactly once and stores the result in the <code>dp[]</code> array. When the same sub-amount is needed again (from a different branch), DP simply looks up the stored answer in O(1) time instead of recomputing it. This transforms the algorithm from exponential O(n^W) time to polynomial O(n &#183; W) time.</p>
+        </div>
+
+        <div class="success-box">
+          <strong>Key Takeaway:</strong><br/>
+          The Recursion Tree is a visual proof of why DP is needed. Every orange-dashed node in the tree represents wasted computation that DP avoids. The more orange nodes you see, the bigger the speedup DP provides over naive recursion.
         </div>
       </div>
     </details>
 
-    <!-- Complexity -->
+    <!-- SECTION 4: Complexity Analysis -->
     <details class="edu-section" open>
-      <summary>&#128202; Complexity Analysis</summary>
+      <summary>&#128202; Section 4 &#8212; Complexity Analysis (CLO-1)</summary>
       <div class="edu-body">
         <div>
-          <h3>Time Complexity</h3>
-          <p>The algorithm has two nested loops: the outer loop runs <code>W</code> times (the target amount) and the inner loop runs at most <code>n</code> times (the number of coins). Therefore:</p>
-          <div class="highlight-box" style="font-size:1rem;text-align:center;padding:14px;">
-            <strong>Time: O(n &#183; W)</strong> &nbsp;|&nbsp; <strong>Space: O(W)</strong>
-          </div>
-          <p style="margin-top:10px;">Where <code>n</code> = number of coin denominations and <code>W</code> = target amount.</p>
+          <h3>Time Complexity: O(n &#183; W)</h3>
+          <p>The DP algorithm has two nested loops. The outer loop runs <code>W</code> times (once for each amount from 1 to the target). The inner loop runs at most <code>n</code> times (once for each coin). Therefore, the total number of operations is at most <code>n &#215; W</code>, giving a time complexity of <strong>O(n &#183; W)</strong>.</p>
+          <p style="margin-top:8px;">Where <code>n</code> = number of coin denominations and <code>W</code> = target amount. For example, with 3 coins and amount 6, the theoretical maximum is 3 &#215; 6 = 18 operations.</p>
         </div>
+
         <div>
-          <h3>Complexity Breakdown</h3>
+          <h3>Space Complexity: O(W)</h3>
+          <p>The algorithm only needs to store the <code>dp[]</code> array, which has <code>W + 1</code> entries (one for each amount from 0 to W). No other significant memory is used. Therefore the space complexity is <strong>O(W)</strong>.</p>
+        </div>
+
+        <div>
+          <h3>Complexity Breakdown Table</h3>
           <table class="complexity-table">
             <thead><tr><th>Component</th><th>Cost</th><th>Reason</th></tr></thead>
             <tbody>
               <tr><td>Outer loop</td><td>O(W)</td><td>Iterates over every amount from 1 to W</td></tr>
-              <tr><td>Inner loop</td><td>O(n)</td><td>Tries every coin for each amount</td></tr>
-              <tr><td>Sorting (pre-step)</td><td>O(n log n)</td><td>One-time sort of coin array</td></tr>
-              <tr><td>Total time</td><td><strong>O(n &#183; W)</strong></td><td>Nested loops dominate</td></tr>
-              <tr><td>Space (dp array)</td><td><strong>O(W)</strong></td><td>One entry per amount 0..W</td></tr>
+              <tr><td>Inner loop</td><td>O(n)</td><td>Tries every coin denomination for each amount</td></tr>
+              <tr><td>Sorting (one-time)</td><td>O(n log n)</td><td>Sort coins before the main loops start</td></tr>
+              <tr><td>Total time</td><td><strong>O(n &#183; W)</strong></td><td>Nested loops dominate; sorting is one-time</td></tr>
+              <tr><td>Space (dp array)</td><td><strong>O(W)</strong></td><td>One entry per amount 0 through W</td></tr>
             </tbody>
           </table>
         </div>
+
         <div>
-          <h3>Sorting Optimization (CLO-2)</h3>
-          <p>By sorting coins in ascending order before the loops, we can <strong>break early</strong> from the inner loop the moment a coin exceeds the current amount. Since all remaining coins are also larger (sorted order), there is no point checking them. This reduces the actual number of operations below the theoretical maximum of <code>n &#215; W</code>, as shown by the <em>Comparisons Saved</em> counter in the tool above.</p>
+          <h3>Sorting Optimization &#8212; CLO-2 (Comparisons Saved)</h3>
+          <p>Before the main loops, the coins are sorted in ascending order. This enables an important optimization: when the inner loop encounters a coin <code>c</code> that is larger than the current amount <code>i</code>, it immediately <strong>breaks</strong> out of the inner loop. Because the coins are sorted, every remaining coin is also larger than <code>i</code>, so there is no point checking them.</p>
+          <p style="margin-top:8px;">This means the actual number of operations is often significantly less than the theoretical maximum of <code>n &#215; W</code>. The <strong>Comparisons Saved</strong> counter in the tool tracks exactly how many inner-loop iterations were skipped because of this sorting optimization. The Growth Chart visualizes the difference between actual and theoretical operations.</p>
         </div>
+
         <div>
-          <h3>Comparison with Naive Recursion</h3>
+          <h3>Algorithm Comparison Table</h3>
           <table class="complexity-table">
-            <thead><tr><th>Approach</th><th>Time</th><th>Space</th><th>Optimal?</th></tr></thead>
+            <thead><tr><th>Approach</th><th>Time Complexity</th><th>Space</th><th>Always Optimal?</th></tr></thead>
             <tbody>
-              <tr><td>Naive Recursion</td><td>O(n^W) &#8212; exponential</td><td>O(W) call stack</td><td>Yes, but too slow</td></tr>
-              <tr><td>Greedy</td><td>O(n log n + W/c_min)</td><td>O(1)</td><td>No &#8212; fails for arbitrary coins</td></tr>
-              <tr><td><strong>DP (this tool)</strong></td><td><strong>O(n &#183; W)</strong></td><td><strong>O(W)</strong></td><td><strong>Yes &#8212; always optimal</strong></td></tr>
+              <tr><td>Naive Recursion</td><td>O(n^W) &#8212; exponential</td><td>O(W) call stack</td><td>Yes, but too slow for large inputs</td></tr>
+              <tr><td>Greedy</td><td>O(n log n + W/c_min)</td><td>O(1)</td><td>No &#8212; fails for arbitrary coin sets</td></tr>
+              <tr><td><strong>DP (this tool)</strong></td><td><strong>O(n &#183; W)</strong></td><td><strong>O(W)</strong></td><td><strong>Yes &#8212; always finds the minimum</strong></td></tr>
             </tbody>
           </table>
         </div>
       </div>
     </details>
 
-    <!-- Greedy vs DP -->
+    <!-- SECTION 5: Greedy vs DP -->
     <details class="edu-section" open>
-      <summary>&#9876;&#65039; Greedy vs Dynamic Programming (CLO-3)</summary>
+      <summary>&#9876;&#65039; Section 5 &#8212; Greedy vs Dynamic Programming (CLO-3)</summary>
       <div class="edu-body">
         <div>
-          <h3>What is the Greedy Approach?</h3>
-          <p>The Greedy algorithm sorts coins in <strong>descending order</strong> and always picks the largest coin that fits into the remaining amount. It is fast and simple, but it is not always correct.</p>
+          <h3>What is the Greedy Algorithm?</h3>
+          <p>The Greedy algorithm for Coin Change works as follows: sort the coins in <strong>descending order</strong> (largest first), then repeatedly pick the largest coin that fits into the remaining amount. It never backtracks or reconsiders a decision.</p>
+          <p style="margin-top:8px;">Greedy is very fast &#8212; it runs in O(n log n) time for sorting plus O(W/c_min) for the loop. But speed comes at a cost: it is not always correct.</p>
         </div>
+
         <div class="warn-box">
-          <strong>Counterexample &#8212; Greedy Fails:</strong><br/>
+          <strong>Classic Counterexample &#8212; Greedy Fails:</strong><br/><br/>
           Coins = <code>[1, 3, 4]</code>, Amount = <code>6</code><br/><br/>
-          <strong>Greedy:</strong> Picks 4 (remaining: 2) &#8594; picks 1 (remaining: 1) &#8594; picks 1 (remaining: 0). <strong>Result: 3 coins</strong>.<br/>
-          <strong>DP:</strong> Finds 3 + 3 = 6. <strong>Result: 2 coins</strong>.<br/><br/>
-          Greedy committed to the 4-coin too early and could not backtrack. DP explored all possibilities and found the true optimum.
+          <strong>Greedy approach:</strong><br/>
+          &#8226; Largest coin that fits: 4. Remaining: 6 &#8722; 4 = 2.<br/>
+          &#8226; Largest coin that fits: 1. Remaining: 2 &#8722; 1 = 1.<br/>
+          &#8226; Largest coin that fits: 1. Remaining: 1 &#8722; 1 = 0.<br/>
+          &#8226; <strong>Result: 3 coins (4 + 1 + 1)</strong><br/><br/>
+          <strong>DP approach:</strong><br/>
+          &#8226; Tries all combinations. Finds that 3 + 3 = 6.<br/>
+          &#8226; <strong>Result: 2 coins (3 + 3) &#8592; This is the true minimum!</strong><br/><br/>
+          Greedy committed to the 4-coin too early and could not go back. DP explored all options and found the true optimum.
         </div>
+
         <div>
           <h3>When Does Greedy Work?</h3>
-          <p>Greedy works correctly for coin systems that satisfy the <strong>Greedy Property</strong> &#8212; where the locally optimal choice is always globally optimal. The standard US coin set <code>[1, 5, 10, 25]</code> satisfies this property, so Greedy always gives the correct answer for US coins. However, for arbitrary coin sets (like <code>[1, 3, 4]</code>), this property does not hold, and DP is required.</p>
+          <p>Greedy works correctly only for coin systems that satisfy the <strong>Greedy Property</strong> &#8212; meaning the locally optimal choice at every step is also globally optimal. The standard US coin system <code>[1, 5, 10, 25]</code> satisfies this property, so Greedy always gives the correct answer for US coins. You can verify this with the "US Coins (41)" preset &#8212; both Greedy and DP will give the same answer.</p>
         </div>
+
         <div>
-          <h3>Design Paradigm Summary</h3>
+          <h3>Paradigm Comparison Table</h3>
           <table class="complexity-table">
             <thead><tr><th>Property</th><th>Greedy</th><th>Dynamic Programming</th></tr></thead>
             <tbody>
-              <tr><td>Strategy</td><td>Locally optimal choice at each step</td><td>Build optimal solution from subproblems</td></tr>
-              <tr><td>Correctness</td><td>Only for special coin sets</td><td>Always correct for any coin set</td></tr>
-              <tr><td>Time</td><td>O(n log n)</td><td>O(n &#183; W)</td></tr>
-              <tr><td>Backtracks?</td><td>No</td><td>Yes (via table lookup)</td></tr>
-              <tr><td>Use when</td><td>Coins satisfy greedy property</td><td>Arbitrary coin sets</td></tr>
+              <tr><td>Strategy</td><td>Locally optimal choice at each step</td><td>Build optimal solution from optimal sub-solutions</td></tr>
+              <tr><td>Correctness</td><td>Only for coin sets with the Greedy Property</td><td>Always correct for any coin set</td></tr>
+              <tr><td>Time Complexity</td><td>O(n log n)</td><td>O(n &#183; W)</td></tr>
+              <tr><td>Space Complexity</td><td>O(1)</td><td>O(W)</td></tr>
+              <tr><td>Can Backtrack?</td><td>No &#8212; commits to each choice</td><td>Yes &#8212; via table lookup</td></tr>
+              <tr><td>Use When</td><td>Coins satisfy the Greedy Property</td><td>Arbitrary or unknown coin sets</td></tr>
             </tbody>
           </table>
         </div>
+
         <div>
-          <h3>Why DP is Correct &#8212; Optimal Substructure Proof</h3>
-          <p>DP is correct because the Coin Change Problem has <strong>Optimal Substructure</strong>: the optimal solution to amount <code>W</code> contains optimal solutions to smaller amounts. Formally: if the optimal solution to <code>W</code> uses coin <code>c</code>, then the remaining <code>W&#8722;c</code> must also be solved optimally. If it were not, we could replace that sub-solution with a better one, contradicting the assumption that our solution for <code>W</code> was optimal.</p>
+          <h3>Why DP is Provably Correct &#8212; Optimal Substructure Proof</h3>
+          <p>DP is correct because the Coin Change Problem has <strong>Optimal Substructure</strong>. Here is the proof by contradiction:</p>
+          <p style="margin-top:8px;">Assume the optimal solution to amount <code>W</code> uses coin <code>c</code>. Then the remaining amount <code>W &#8722; c</code> must also be solved optimally. Why? Suppose it were not optimal &#8212; suppose there is a better solution for <code>W &#8722; c</code> using fewer coins. Then we could replace our sub-solution with that better one, giving us a better solution for <code>W</code> overall. But this contradicts our assumption that we already had the optimal solution for <code>W</code>. Therefore, every sub-solution in the optimal answer must itself be optimal. This is exactly what DP guarantees.</p>
         </div>
       </div>
     </details>
 
-    <!-- Edge Cases -->
+    <!-- SECTION 6: Edge Cases & Self-Study -->
     <details class="edu-section">
-      <summary>&#128269; Edge Cases &amp; When to Use DP</summary>
+      <summary>&#128269; Section 6 &#8212; Edge Cases, Tips &amp; Self-Study Challenges</summary>
       <div class="edu-body">
         <div>
-          <h3>Edge Cases</h3>
+          <h3>Important Edge Cases</h3>
+          <table class="complexity-table">
+            <thead><tr><th>Edge Case</th><th>Input Example</th><th>Expected Output</th><th>How DP Handles It</th></tr></thead>
+            <tbody>
+              <tr><td>Amount = 0</td><td>Any coins, amount = 0</td><td>0 coins</td><td>Base case: dp[0] = 0 directly</td></tr>
+              <tr><td>Impossible</td><td>coins=[2], amount=3</td><td>Impossible</td><td>dp[3] stays infinity; tool reports "Impossible"</td></tr>
+              <tr><td>Single coin equals amount</td><td>coins=[6], amount=6</td><td>1 coin</td><td>dp[6] = dp[0] + 1 = 1</td></tr>
+              <tr><td>All coins larger than amount</td><td>coins=[5,10], amount=3</td><td>Impossible</td><td>Inner loop breaks immediately for all i &lt; 5</td></tr>
+              <tr><td>Coin = 1 always present</td><td>coins=[1,...], any amount</td><td>Always solvable</td><td>dp[i] = i at worst (all 1-coins)</td></tr>
+            </tbody>
+          </table>
+        </div>
+
+        <div>
+          <h3>Common Mistakes to Avoid</h3>
           <ul>
-            <li><strong>Amount = 0:</strong> Always returns 0 coins. The base case <code>dp[0] = 0</code> handles this directly.</li>
-            <li><strong>Impossible case:</strong> If no combination of coins can reach the amount (e.g., coins = <code>[2]</code>, amount = <code>3</code>), <code>dp[amount]</code> remains <code>infinity</code> and the tool reports "Impossible".</li>
-            <li><strong>Single coin = amount:</strong> Returns 1 coin immediately.</li>
-            <li><strong>Large amounts:</strong> DP handles large amounts efficiently in O(n&#183;W) time, unlike exponential recursion.</li>
+            <li><strong>Forgetting the base case:</strong> If you do not set <code>dp[0] = 0</code>, the entire table will stay at infinity because every recurrence depends on <code>dp[0]</code>.</li>
+            <li><strong>Using infinity in arithmetic:</strong> Before using <code>dp[i - c]</code>, always check that it is not infinity. Otherwise <code>infinity + 1</code> causes an overflow error.</li>
+            <li><strong>Confusing n and W:</strong> <code>n</code> is the number of coin types (the length of the coins array). <code>W</code> is the target amount. The complexity is O(n &#183; W), not O(n^2).</li>
+            <li><strong>Thinking Greedy always works:</strong> It does not. Always test with the [1, 3, 4] &#8594; 6 counterexample before trusting a Greedy solution.</li>
           </ul>
         </div>
+
+        <div class="challenge-box">
+          <h4>&#127919; Self-Study Challenges &#8212; Test Your Understanding</h4>
+          <p>Use this tool to answer the following questions on your own:</p>
+          <ol>
+            <li>Load "Classic DP (11)". Why does Greedy fail here? What does Greedy pick vs what DP finds?</li>
+            <li>Load "Standard (11)". Does Greedy give the correct answer here? Why does it work for this coin set?</li>
+            <li>Create your own input: coins = [3, 7], amount = 14. What is the minimum? Can you trace it by hand first?</li>
+            <li>What happens if you use coins = [1], amount = 20? How many operations does the tool report? Does this match O(n &#183; W) = 1 &#215; 20 = 20?</li>
+            <li>Look at the Recursion Tree for "Greedy Fails (6)". Count the orange-dashed nodes. Each one represents a computation that DP avoids. How many are there?</li>
+          </ol>
+        </div>
+
         <div>
-          <h3>When to Use Dynamic Programming</h3>
+          <h3>When Should You Use Dynamic Programming?</h3>
+          <p>Use Dynamic Programming when a problem has both of these properties:</p>
           <ul>
-            <li>When the problem has <strong>Optimal Substructure</strong> (optimal solution built from optimal sub-solutions).</li>
-            <li>When the problem has <strong>Overlapping Subproblems</strong> (same sub-problems are solved multiple times in recursion).</li>
-            <li>When a Greedy approach does not guarantee correctness for all inputs.</li>
-            <li>When the input size is manageable (polynomial in W and n).</li>
+            <li><strong>Optimal Substructure:</strong> The optimal solution to the full problem can be built from optimal solutions to its sub-problems.</li>
+            <li><strong>Overlapping Subproblems:</strong> The same sub-problems are solved multiple times in a naive recursive approach.</li>
           </ul>
+          <p style="margin-top:8px;">The Coin Change Problem has both properties, which is why DP is the correct approach. Other classic DP problems include: Longest Common Subsequence, 0/1 Knapsack, Matrix Chain Multiplication, and Fibonacci (with memoization).</p>
         </div>
       </div>
     </details>
@@ -891,61 +939,58 @@
 // =============================================
 // STATE
 // =============================================
-let steps    = [];
-let stepIdx  = 0;
-let playTimer = null;
-let lastCoins = [];
-let lastAmount = 0;
+let steps = [], stepIdx = 0, playTimer = null;
+let lastCoins = [], lastAmount = 0;
+let liveTreeTimer = null;
 
 // =============================================
-// INPUT MANAGEMENT — Dynamic coin fields
+// INPUT MANAGEMENT
 // =============================================
 function generateCoinInputs() {
   const n = parseInt(document.getElementById('num-coins').value, 10);
-  if (isNaN(n) || n < 1 || n > 10) {
-    alert('Please enter a number of coin types between 1 and 10.');
-    return;
-  }
+  if (isNaN(n) || n < 1 || n > 10) { alert('Please enter between 1 and 10 coin types.'); return; }
   const grid = document.getElementById('coin-values-grid');
-  // Preserve existing values
   const existing = [];
   grid.querySelectorAll('input').forEach(inp => existing.push(inp.value));
-
   grid.innerHTML = '';
+  const defaults = [1, 3, 4, 5, 10, 25, 50, 100, 200, 500];
   for (let i = 0; i < n; i++) {
     const wrap = document.createElement('div');
     wrap.className = 'coin-val-wrap';
     const lbl = document.createElement('label');
     lbl.textContent = 'Coin ' + (i + 1);
     const inp = document.createElement('input');
-    inp.type = 'number';
-    inp.min = '1';
-    inp.max = '999';
-    inp.value = existing[i] !== undefined && existing[i] !== '' ? existing[i] : getDefaultCoin(i);
-    wrap.appendChild(lbl);
-    wrap.appendChild(inp);
+    inp.type = 'number'; inp.min = '1'; inp.max = '999';
+    inp.value = (existing[i] !== undefined && existing[i] !== '') ? existing[i] : (defaults[i] || i + 1);
+    inp.oninput = liveUpdateTree;  // ← LIVE UPDATE on every keystroke
+    wrap.appendChild(lbl); wrap.appendChild(inp);
     grid.appendChild(wrap);
   }
   syncHiddenInput();
+  liveUpdateTree();
 }
 
-function getDefaultCoin(index) {
-  const defaults = [1, 3, 4, 5, 10, 25, 50, 100, 200, 500];
-  return defaults[index] !== undefined ? defaults[index] : (index + 1);
+function liveUpdateTree() {
+  // Debounce: wait 300ms after last keystroke before redrawing
+  clearTimeout(liveTreeTimer);
+  liveTreeTimer = setTimeout(() => {
+    syncHiddenInput();
+    const coins = getCoinsFromInputs();
+    const amount = parseInt(document.getElementById('amount-input').value, 10);
+    if (coins.length > 0 && !isNaN(amount) && amount >= 0) {
+      drawRecursionTree(coins, amount);
+    }
+  }, 300);
 }
 
 function syncHiddenInput() {
-  const vals = getCoinsFromInputs();
-  document.getElementById('coins-input').value = vals.join(', ');
+  document.getElementById('coins-input').value = getCoinsFromInputs().join(', ');
 }
 
 function getCoinsFromInputs() {
   const inputs = document.getElementById('coin-values-grid').querySelectorAll('input');
   const vals = [];
-  inputs.forEach(inp => {
-    const v = parseInt(inp.value, 10);
-    if (!isNaN(v) && v > 0) vals.push(v);
-  });
+  inputs.forEach(inp => { const v = parseInt(inp.value, 10); if (!isNaN(v) && v > 0) vals.push(v); });
   return vals;
 }
 
@@ -954,101 +999,68 @@ function getCoinsFromInputs() {
 // =============================================
 function coinChangeDP(coins, amount) {
   const n = coins.length;
-  const sorted = [...coins].sort((a, b) => a - b); // ascending — CLO-2 sorting
-  const dp   = new Array(amount + 1).fill(Infinity);
+  const sorted = [...coins].sort((a, b) => a - b);
+  const dp = new Array(amount + 1).fill(Infinity);
   const from = new Array(amount + 1).fill(-1);
   dp[0] = 0;
-
   const localSteps = [];
   let ops = 0, saved = 0, updates = 0;
 
-  // Record initial state
-  localSteps.push({
-    type: 'init', line: 2,
-    dpState: [...dp],
-    desc: 'Initialized dp[0..' + amount + '] = infinity and dp[0] = 0 (base case: 0 coins for amount 0).',
-    ops, saved, updates, amount: null, coin: null
-  });
+  localSteps.push({ type:'init', line:2, dpState:[...dp],
+    desc:'Initialized dp[0..' + amount + '] = infinity. Set dp[0] = 0 (base case: 0 coins needed for amount 0).',
+    ops, saved, updates, amount:null, coin:null });
 
   for (let i = 1; i <= amount; i++) {
-    localSteps.push({
-      type: 'outer', line: 4,
-      dpState: [...dp],
-      desc: 'Outer loop: now solving for amount i = ' + i + '.',
-      ops, saved, updates, amount: i, coin: null
-    });
+    localSteps.push({ type:'outer', line:4, dpState:[...dp],
+      desc:'Outer loop: now solving for amount i = ' + i + '. We will try every coin to find the best option.',
+      ops, saved, updates, amount:i, coin:null });
 
     for (let ci = 0; ci < n; ci++) {
       const c = sorted[ci];
-
       if (c > i) {
         saved += (n - ci);
-        localSteps.push({
-          type: 'break', line: 6,
-          dpState: [...dp],
-          desc: 'Coin ' + c + ' > amount ' + i + '. Since coins are sorted, all remaining coins are also too large. Break inner loop. Saved ' + (n - ci) + ' comparison(s).',
-          ops, saved, updates, amount: i, coin: c
-        });
+        localSteps.push({ type:'break', line:6, dpState:[...dp],
+          desc:'Coin ' + c + ' > amount ' + i + '. Since coins are sorted ascending, all remaining coins are also too large. Breaking inner loop early. Saved ' + (n - ci) + ' comparison(s) — this is the CLO-2 sorting optimization.',
+          ops, saved, updates, amount:i, coin:c });
         break;
       }
-
       ops++;
-      localSteps.push({
-        type: 'compare', line: 7,
-        dpState: [...dp],
-        desc: 'Trying coin ' + c + ' for amount ' + i + '. Remainder = ' + i + ' - ' + c + ' = ' + (i - c) + '. dp[' + (i - c) + '] = ' + (dp[i - c] === Infinity ? 'inf' : dp[i - c]) + '.',
-        ops, saved, updates, amount: i, coin: c
-      });
+      localSteps.push({ type:'compare', line:7, dpState:[...dp],
+        desc:'Trying coin ' + c + ' for amount ' + i + '. Remainder = ' + i + ' - ' + c + ' = ' + (i-c) + '. dp[' + (i-c) + '] = ' + (dp[i-c] === Infinity ? 'infinity' : dp[i-c]) + '. Checking if dp[' + (i-c) + '] + 1 < dp[' + i + ']...',
+        ops, saved, updates, amount:i, coin:c });
 
-      if (dp[i - c] !== Infinity && dp[i - c] + 1 < dp[i]) {
-        dp[i]   = dp[i - c] + 1;
-        from[i] = c;
-        updates++;
-        localSteps.push({
-          type: 'update', line: 8,
-          dpState: [...dp],
-          desc: 'Updated! dp[' + i + '] = dp[' + (i - c) + '] + 1 = ' + dp[i] + '. Using coin ' + c + ' is better.',
-          ops, saved, updates, amount: i, coin: c
-        });
+      if (dp[i-c] !== Infinity && dp[i-c] + 1 < dp[i]) {
+        dp[i] = dp[i-c] + 1; from[i] = c; updates++;
+        localSteps.push({ type:'update', line:8, dpState:[...dp],
+          desc:'Updated! dp[' + i + '] = dp[' + (i-c) + '] + 1 = ' + dp[i] + '. Using coin ' + c + ' gives a better solution for amount ' + i + '.',
+          ops, saved, updates, amount:i, coin:c });
       }
     }
   }
 
   const result = dp[amount];
   const path = [];
-  if (result !== Infinity) {
-    let cur = amount;
-    while (cur > 0) { path.push(from[cur]); cur -= from[cur]; }
-  }
+  if (result !== Infinity) { let cur = amount; while (cur > 0) { path.push(from[cur]); cur -= from[cur]; } }
 
-  localSteps.push({
-    type: 'done', line: 9,
-    dpState: [...dp],
+  localSteps.push({ type:'done', line:9, dpState:[...dp],
     desc: result === Infinity
-      ? 'No solution exists. dp[' + amount + '] = infinity — it is impossible to make ' + amount + ' with coins [' + sorted.join(', ') + '].'
-      : 'Done! dp[' + amount + '] = ' + result + '. Optimal coins used: [' + path.join(' + ') + '].',
-    ops, saved, updates, amount: null, coin: null,
-    result, path
-  });
+      ? 'Algorithm complete. dp[' + amount + '] = infinity — it is IMPOSSIBLE to make ' + amount + ' with coins [' + sorted.join(', ') + ']. No valid combination exists.'
+      : 'Algorithm complete! dp[' + amount + '] = ' + result + '. Optimal solution: [' + path.join(' + ') + '] = ' + amount + ' using ' + result + ' coin(s).',
+    ops, saved, updates, amount:null, coin:null, result, path });
 
-  return { steps: localSteps, dp, from, result, path, ops, saved, updates, n, amount, sorted };
+  return { steps:localSteps, dp, from, result, path, ops, saved, updates, n, amount, sorted };
 }
 
 // =============================================
 // ALGORITHM 2: GREEDY
 // =============================================
 function coinChangeGreedy(coins, amount) {
-  const sorted = [...coins].sort((a, b) => b - a); // descending
+  const sorted = [...coins].sort((a, b) => b - a);
   let remaining = amount;
   const used = [];
-  for (const c of sorted) {
-    while (remaining >= c) {
-      used.push(c);
-      remaining -= c;
-    }
-  }
-  if (remaining === 0) return { success: true, coins: used, count: used.length };
-  return { success: false, coins: [], count: -1 };
+  for (const c of sorted) { while (remaining >= c) { used.push(c); remaining -= c; } }
+  if (remaining === 0) return { success:true, coins:used, count:used.length };
+  return { success:false, coins:[], count:-1 };
 }
 
 // =============================================
@@ -1056,31 +1068,23 @@ function coinChangeGreedy(coins, amount) {
 // =============================================
 function buildSteps() {
   syncHiddenInput();
-  const coins  = getCoinsFromInputs();
+  const coins = getCoinsFromInputs();
   const amount = parseInt(document.getElementById('amount-input').value, 10);
-
   if (coins.length === 0 || isNaN(amount) || amount < 0) {
-    alert('Please enter valid coins and a non-negative amount.');
-    return;
+    alert('Please enter valid coins and a non-negative amount.'); return;
   }
-
   resetAll(false);
-  lastCoins  = coins;
-  lastAmount = amount;
-
+  lastCoins = coins; lastAmount = amount;
   const res = coinChangeDP(coins, amount);
-  steps = res.steps;
-  stepIdx = 0;
-
+  steps = res.steps; stepIdx = 0;
   drawDPTable(amount);
   drawRecursionTree(coins, amount);
   drawGrowthChart(res.ops, res.n, res.amount, res.saved);
   updateCLOStats(res.ops, res.n, res.amount, res.saved, amount);
-
   setStatus('Ready');
   document.getElementById('stat-step').textContent = '0 / ' + steps.length;
   setButtons('ready');
-  setExplanation('Steps built! Click <strong>Step</strong> to go frame-by-frame, or <strong>Play</strong> to watch automatically.');
+  setExplanation('Steps built! There are <strong>' + steps.length + '</strong> steps total. Click <strong>Step</strong> to go frame-by-frame, or <strong>Play</strong> to watch automatically. Watch the DP Table and Pseudocode highlight as the algorithm runs.');
 }
 
 // =============================================
@@ -1088,14 +1092,9 @@ function buildSteps() {
 // =============================================
 function stepForward() {
   if (stepIdx >= steps.length) return;
-  renderStep(steps[stepIdx], stepIdx);
-  stepIdx++;
+  renderStep(steps[stepIdx], stepIdx); stepIdx++;
   document.getElementById('stat-step').textContent = stepIdx + ' / ' + steps.length;
-  if (stepIdx >= steps.length) {
-    setStatus('Complete');
-    setButtons('done');
-    pauseAnim();
-  }
+  if (stepIdx >= steps.length) { setStatus('Complete'); setButtons('done'); pauseAnim(); }
 }
 
 // =============================================
@@ -1105,18 +1104,14 @@ function renderStep(s, idx) {
   highlightLine(s.line);
   setExplanation(s.desc);
   updateDPTable(s.dpState, s.amount, s.coin, s.type);
-
   document.getElementById('stat-ops').textContent     = s.ops;
   document.getElementById('stat-saved').textContent   = s.saved;
   document.getElementById('stat-updates').textContent = s.updates;
   document.getElementById('clo-ops').textContent      = s.ops;
   document.getElementById('clo-saved').textContent    = s.saved;
-
   if (s.type === 'done') {
-    document.getElementById('stat-result').textContent =
-      s.result === Infinity ? 'Impossible' : s.result + ' coins';
+    document.getElementById('stat-result').textContent = s.result === Infinity ? 'Impossible' : s.result + ' coins';
   }
-
   addHistory(idx + 1, s);
 }
 
@@ -1127,53 +1122,30 @@ function drawDPTable(amount) {
   const wrap = document.getElementById('dp-svg');
   wrap.innerHTML = '';
   const cellW = 52, cellH = 52, pad = 6;
-  const total = amount + 1;
-  const svgW  = total * (cellW + pad) + pad;
-  const svgH  = cellH + 50;
-
+  const svgW = (amount + 1) * (cellW + pad) + pad;
+  const svgH = cellH + 50;
   const svg = document.createElementNS('http://www.w3.org/2000/svg', 'svg');
-  svg.setAttribute('width',   svgW);
-  svg.setAttribute('height',  svgH);
+  svg.setAttribute('width', svgW); svg.setAttribute('height', svgH);
   svg.setAttribute('viewBox', '0 0 ' + svgW + ' ' + svgH);
-
   for (let i = 0; i <= amount; i++) {
     const x = pad + i * (cellW + pad);
-
     const lbl = document.createElementNS('http://www.w3.org/2000/svg', 'text');
-    lbl.setAttribute('x', x + cellW / 2);
-    lbl.setAttribute('y', 14);
-    lbl.setAttribute('text-anchor', 'middle');
-    lbl.setAttribute('fill', '#666');
-    lbl.setAttribute('font-size', '11');
-    lbl.textContent = i;
-    svg.appendChild(lbl);
-
+    lbl.setAttribute('x', x + cellW/2); lbl.setAttribute('y', 14);
+    lbl.setAttribute('text-anchor', 'middle'); lbl.setAttribute('fill', '#666'); lbl.setAttribute('font-size', '11');
+    lbl.textContent = i; svg.appendChild(lbl);
     const rect = document.createElementNS('http://www.w3.org/2000/svg', 'rect');
-    rect.setAttribute('id',     'cell-rect-' + i);
-    rect.setAttribute('x',      x);
-    rect.setAttribute('y',      20);
-    rect.setAttribute('width',  cellW);
-    rect.setAttribute('height', cellH);
-    rect.setAttribute('rx',     5);
-    rect.setAttribute('fill',   i === 0 ? '#1a3a1a' : '#2a2a2a');
-    rect.setAttribute('stroke', '#444');
-    rect.setAttribute('stroke-width', '1');
-    rect.style.transition = 'fill 0.25s ease';
-    svg.appendChild(rect);
-
+    rect.setAttribute('id', 'cell-rect-' + i); rect.setAttribute('x', x); rect.setAttribute('y', 20);
+    rect.setAttribute('width', cellW); rect.setAttribute('height', cellH); rect.setAttribute('rx', 5);
+    rect.setAttribute('fill', i === 0 ? '#1a3a1a' : '#2a2a2a');
+    rect.setAttribute('stroke', '#444'); rect.setAttribute('stroke-width', '1');
+    rect.style.transition = 'fill 0.25s ease'; svg.appendChild(rect);
     const val = document.createElementNS('http://www.w3.org/2000/svg', 'text');
-    val.setAttribute('id',           'cell-val-' + i);
-    val.setAttribute('x',            x + cellW / 2);
-    val.setAttribute('y',            20 + cellH / 2 + 5);
-    val.setAttribute('text-anchor',  'middle');
-    val.setAttribute('fill',         i === 0 ? '#4caf50' : '#555');
-    val.setAttribute('font-size',    '15');
-    val.setAttribute('font-weight',  '700');
-    val.setAttribute('font-family',  'Courier New, monospace');
-    val.textContent = i === 0 ? '0' : 'inf';
-    svg.appendChild(val);
+    val.setAttribute('id', 'cell-val-' + i); val.setAttribute('x', x + cellW/2); val.setAttribute('y', 20 + cellH/2 + 5);
+    val.setAttribute('text-anchor', 'middle'); val.setAttribute('fill', i === 0 ? '#4caf50' : '#555');
+    val.setAttribute('font-size', '14'); val.setAttribute('font-weight', '700');
+    val.setAttribute('font-family', 'Courier New, monospace');
+    val.textContent = i === 0 ? '0' : 'inf'; svg.appendChild(val);
   }
-
   wrap.appendChild(svg);
 }
 
@@ -1185,219 +1157,137 @@ function updateDPTable(dpState, activeAmt, activeCoin, type) {
     const rect = document.getElementById('cell-rect-' + i);
     const val  = document.getElementById('cell-val-' + i);
     if (!rect || !val) continue;
-
-    let fill  = '#2a2a2a';
-    let color = '#555';
-
-    if (dpState[i] !== Infinity) {
-      fill  = '#1a3a1a';
-      color = '#4caf50';
-    }
-    if (i === activeAmt && (type === 'outer' || type === 'compare' || type === 'update' || type === 'break')) {
-      fill  = '#03dac6';
-      color = '#000';
-    }
-    if (activeCoin !== null && i === activeAmt - activeCoin && type === 'compare') {
-      fill  = '#cf6679';
-      color = '#fff';
-    }
-    if (type === 'update' && i === activeAmt) {
-      fill  = '#6200ea';
-      color = '#fff';
-    }
-    if (type === 'done' && i === activeAmt) {
-      fill  = '#bb86fc';
-      color = '#000';
-    }
-    if (i === 0) { fill = '#1a3a1a'; color = '#4caf50'; }
-
-    rect.setAttribute('fill', fill);
-    val.setAttribute('fill', color);
+    let fill = '#2a2a2a', color = '#555';
+    if (dpState[i] !== Infinity) { fill = '#1a3a1a'; color = '#4caf50'; }
+    if (i === activeAmt && (type==='outer'||type==='compare'||type==='update'||type==='break')) { fill='#03dac6'; color='#000'; }
+    if (activeCoin !== null && i === activeAmt - activeCoin && type === 'compare') { fill='#cf6679'; color='#fff'; }
+    if (type === 'update' && i === activeAmt) { fill='#6200ea'; color='#fff'; }
+    if (type === 'done' && i === activeAmt) { fill='#bb86fc'; color='#000'; }
+    if (i === 0) { fill='#1a3a1a'; color='#4caf50'; }
+    rect.setAttribute('fill', fill); val.setAttribute('fill', color);
     val.textContent = dpState[i] === Infinity ? 'inf' : dpState[i];
   }
 }
 
 // =============================================
-// DRAW RECURSION TREE (SVG — DYNAMIC)
+// DRAW RECURSION TREE (SVG — FULLY DYNAMIC)
 // Generates the actual recursive call tree for
-// the current coins and amount, then annotates
-// repeated subproblems with orange dashed boxes.
+// the current coins and amount. Updates live on
+// every input change. Annotates overlapping
+// subproblems with orange dashed borders.
 // =============================================
 function drawRecursionTree(coins, amount) {
   const svgEl = document.getElementById('tree-svg');
   svgEl.innerHTML = '';
 
-  // --- Step 1: Build the tree structure (BFS/DFS with depth limit) ---
-  const MAX_DEPTH   = 4;   // max levels to draw
-  const MAX_NODES   = 80;  // safety cap
+  const MAX_DEPTH = 4, MAX_NODES = 80;
   const sortedCoins = [...coins].sort((a, b) => a - b);
 
-  // Each node: { id, amount, depth, parentId, coinUsed }
-  const nodes = [];
-  const edges = [];
-  let nodeId  = 0;
-  let nodeCount = 0;
-
-  // BFS queue
+  // Build tree via BFS
+  const nodes = [], edges = [];
+  let nodeId = 0, nodeCount = 0;
   const queue = [{ amount: amount, depth: 0, parentId: null, coinUsed: null }];
-
   while (queue.length > 0 && nodeCount < MAX_NODES) {
     const { amount: amt, depth, parentId, coinUsed } = queue.shift();
     const id = nodeId++;
     nodes.push({ id, amount: amt, depth, parentId, coinUsed });
     nodeCount++;
-
-    if (parentId !== null) {
-      edges.push({ from: parentId, to: id, coin: coinUsed });
-    }
-
+    if (parentId !== null) edges.push({ from: parentId, to: id, coin: coinUsed });
     if (depth < MAX_DEPTH && amt > 0) {
-      for (const c of sortedCoins) {
-        if (c <= amt) {
-          queue.push({ amount: amt - c, depth: depth + 1, parentId: id, coinUsed: c });
-        }
-      }
+      for (const c of sortedCoins) { if (c <= amt) queue.push({ amount: amt - c, depth: depth + 1, parentId: id, coinUsed: c }); }
     }
   }
 
-  // --- Step 2: Assign x positions using level-based layout ---
-  // Group nodes by depth
+  // Assign positions
   const byDepth = {};
-  nodes.forEach(n => {
-    if (!byDepth[n.depth]) byDepth[n.depth] = [];
-    byDepth[n.depth].push(n);
-  });
-
+  nodes.forEach(n => { if (!byDepth[n.depth]) byDepth[n.depth] = []; byDepth[n.depth].push(n); });
   const maxDepth = Math.max(...nodes.map(n => n.depth));
-  const levelH   = 70;
-  const nodeR    = 18;
-  const padX     = 30;
-
-  // Assign x: evenly space nodes at each depth
+  const levelH = 72, nodeR = 18, padX = 30;
   nodes.forEach(n => {
-    const peers = byDepth[n.depth];
-    const idx   = peers.indexOf(n);
-    const total = peers.length;
-    // Calculate total width needed
-    const spacing = Math.max(50, Math.min(80, 560 / Math.max(total, 1)));
-    const totalW  = spacing * (total - 1);
-    const startX  = Math.max(padX + nodeR, 280 - totalW / 2);
+    const peers = byDepth[n.depth], idx = peers.indexOf(n), total = peers.length;
+    const spacing = Math.max(44, Math.min(80, 560 / Math.max(total, 1)));
+    const totalW = spacing * (total - 1);
+    const startX = Math.max(padX + nodeR, 280 - totalW / 2);
     n.x = startX + idx * spacing;
     n.y = 30 + n.depth * levelH;
   });
 
-  // --- Step 3: Compute SVG dimensions ---
   const svgW = Math.max(560, Math.max(...nodes.map(n => n.x)) + padX + nodeR + 20);
   const svgH = Math.max(220, (maxDepth + 1) * levelH + 60);
-  svgEl.setAttribute('width',   svgW);
-  svgEl.setAttribute('height',  svgH);
+  svgEl.setAttribute('width', svgW); svgEl.setAttribute('height', svgH);
   svgEl.setAttribute('viewBox', '0 0 ' + svgW + ' ' + svgH);
 
-  // --- Step 4: Find repeated amounts (overlapping subproblems) ---
+  // Find repeated amounts
   const amtCount = {};
-  nodes.forEach(n => {
-    amtCount[n.amount] = (amtCount[n.amount] || 0) + 1;
-  });
+  nodes.forEach(n => { amtCount[n.amount] = (amtCount[n.amount] || 0) + 1; });
   const repeated = new Set(Object.keys(amtCount).filter(k => amtCount[k] > 1).map(Number));
-
-  // --- Step 5: Draw edges first (behind nodes) ---
   const nodeById = {};
   nodes.forEach(n => { nodeById[n.id] = n; });
 
+  // Draw edges
   edges.forEach(e => {
-    const src = nodeById[e.from];
-    const dst = nodeById[e.to];
+    const src = nodeById[e.from], dst = nodeById[e.to];
     if (!src || !dst) return;
     const l = document.createElementNS('http://www.w3.org/2000/svg', 'line');
     l.setAttribute('x1', src.x); l.setAttribute('y1', src.y + nodeR);
     l.setAttribute('x2', dst.x); l.setAttribute('y2', dst.y - nodeR);
     l.setAttribute('stroke', '#444'); l.setAttribute('stroke-width', '1.5');
     svgEl.appendChild(l);
-
-    // Edge label: coin used
-    const midX = (src.x + dst.x) / 2;
-    const midY = (src.y + dst.y) / 2;
     const lt = document.createElementNS('http://www.w3.org/2000/svg', 'text');
-    lt.setAttribute('x', midX + 5); lt.setAttribute('y', midY);
-    lt.setAttribute('text-anchor', 'start');
-    lt.setAttribute('fill', '#666'); lt.setAttribute('font-size', '9');
-    lt.textContent = '-' + e.coin;
-    svgEl.appendChild(lt);
+    lt.setAttribute('x', (src.x + dst.x) / 2 + 4); lt.setAttribute('y', (src.y + dst.y) / 2);
+    lt.setAttribute('text-anchor', 'start'); lt.setAttribute('fill', '#666'); lt.setAttribute('font-size', '9');
+    lt.textContent = '-' + e.coin; svgEl.appendChild(lt);
   });
 
-  // --- Step 6: Draw nodes ---
+  // Draw nodes
   nodes.forEach(n => {
     const isRepeated = repeated.has(n.amount) && n.id !== 0;
-    const isBase     = n.amount === 0;
-    const isRoot     = n.id === 0;
-
-    // Node circle
+    const isBase = n.amount === 0;
     const circle = document.createElementNS('http://www.w3.org/2000/svg', 'circle');
-    circle.setAttribute('cx', n.x); circle.setAttribute('cy', n.y);
-    circle.setAttribute('r',  nodeR);
-    let fill = '#3700b3';
-    if (isBase)     fill = '#4caf50';
-    if (isRepeated) fill = '#cf6679';
-    if (isRoot)     fill = '#3700b3';
-    circle.setAttribute('fill', fill);
+    circle.setAttribute('cx', n.x); circle.setAttribute('cy', n.y); circle.setAttribute('r', nodeR);
+    circle.setAttribute('fill', isBase ? '#4caf50' : '#3700b3');
     circle.setAttribute('stroke', isRepeated ? '#ffb74d' : '#555');
     circle.setAttribute('stroke-width', isRepeated ? '2.5' : '1.5');
     svgEl.appendChild(circle);
-
-    // Node label
     const txt = document.createElementNS('http://www.w3.org/2000/svg', 'text');
     txt.setAttribute('x', n.x); txt.setAttribute('y', n.y + 5);
-    txt.setAttribute('text-anchor', 'middle');
-    txt.setAttribute('fill', isBase ? '#000' : '#fff');
+    txt.setAttribute('text-anchor', 'middle'); txt.setAttribute('fill', isBase ? '#000' : '#fff');
     txt.setAttribute('font-size', '12'); txt.setAttribute('font-weight', '700');
     txt.setAttribute('font-family', 'Courier New, monospace');
-    txt.textContent = n.amount;
-    svgEl.appendChild(txt);
-
-    // Dashed orange box for repeated subproblems
+    txt.textContent = n.amount; svgEl.appendChild(txt);
     if (isRepeated) {
       const box = document.createElementNS('http://www.w3.org/2000/svg', 'rect');
-      box.setAttribute('x',      n.x - nodeR - 4);
-      box.setAttribute('y',      n.y - nodeR - 4);
-      box.setAttribute('width',  (nodeR + 4) * 2);
-      box.setAttribute('height', (nodeR + 4) * 2);
-      box.setAttribute('rx', nodeR + 4);
-      box.setAttribute('fill',   'none');
-      box.setAttribute('stroke', '#ffb74d');
-      box.setAttribute('stroke-width', '1.5');
-      box.setAttribute('stroke-dasharray', '4,3');
-      svgEl.appendChild(box);
+      box.setAttribute('x', n.x - nodeR - 5); box.setAttribute('y', n.y - nodeR - 5);
+      box.setAttribute('width', (nodeR + 5) * 2); box.setAttribute('height', (nodeR + 5) * 2);
+      box.setAttribute('rx', nodeR + 5); box.setAttribute('fill', 'none');
+      box.setAttribute('stroke', '#ffb74d'); box.setAttribute('stroke-width', '1.5');
+      box.setAttribute('stroke-dasharray', '4,3'); svgEl.appendChild(box);
     }
   });
 
-  // --- Step 7: Legend ---
-  const legendY = svgH - 20;
-  function legendDot(x, y, fill, stroke, dash) {
+  // Legend
+  const legendY = svgH - 18;
+  function lDot(x, y, fill, stroke, dash) {
     const c = document.createElementNS('http://www.w3.org/2000/svg', 'circle');
     c.setAttribute('cx', x); c.setAttribute('cy', y); c.setAttribute('r', 6);
-    c.setAttribute('fill', fill);
-    c.setAttribute('stroke', stroke || '#555'); c.setAttribute('stroke-width', '1.5');
+    c.setAttribute('fill', fill); c.setAttribute('stroke', stroke || '#555'); c.setAttribute('stroke-width', '1.5');
     if (dash) c.setAttribute('stroke-dasharray', '3,2');
     svgEl.appendChild(c);
   }
-  function legendTxt(x, y, text) {
+  function lTxt(x, y, text) {
     const t = document.createElementNS('http://www.w3.org/2000/svg', 'text');
-    t.setAttribute('x', x); t.setAttribute('y', y + 4);
-    t.setAttribute('fill', '#888'); t.setAttribute('font-size', '9');
-    t.textContent = text;
-    svgEl.appendChild(t);
+    t.setAttribute('x', x); t.setAttribute('y', y + 4); t.setAttribute('fill', '#888'); t.setAttribute('font-size', '9');
+    t.textContent = text; svgEl.appendChild(t);
   }
-  legendDot(20, legendY, '#3700b3'); legendTxt(30, legendY, 'Recursive call');
-  legendDot(130, legendY, '#4caf50'); legendTxt(140, legendY, 'Base case (0)');
-  legendDot(230, legendY, '#cf6679', '#ffb74d', true); legendTxt(240, legendY, 'Repeated subproblem (DP saves this!)');
+  lDot(16, legendY, '#3700b3'); lTxt(26, legendY, 'Recursive call');
+  lDot(120, legendY, '#4caf50'); lTxt(130, legendY, 'Base case (0)');
+  lDot(220, legendY, '#3700b3', '#ffb74d', true); lTxt(230, legendY, 'Repeated subproblem — DP avoids recomputing this!');
 
-  // --- Step 8: Truncation notice ---
   if (nodeCount >= MAX_NODES) {
     const notice = document.createElementNS('http://www.w3.org/2000/svg', 'text');
-    notice.setAttribute('x', svgW / 2); notice.setAttribute('y', svgH - 5);
-    notice.setAttribute('text-anchor', 'middle');
-    notice.setAttribute('fill', '#ffb74d'); notice.setAttribute('font-size', '9');
-    notice.textContent = '(Tree truncated at ' + MAX_NODES + ' nodes for readability — actual recursion is much larger)';
+    notice.setAttribute('x', svgW / 2); notice.setAttribute('y', svgH - 4);
+    notice.setAttribute('text-anchor', 'middle'); notice.setAttribute('fill', '#ffb74d'); notice.setAttribute('font-size', '9');
+    notice.textContent = '(Tree truncated at ' + MAX_NODES + ' nodes — actual recursion is much larger for this input)';
     svgEl.appendChild(notice);
   }
 }
@@ -1408,48 +1298,29 @@ function drawRecursionTree(coins, amount) {
 function drawGrowthChart(actualOps, n, W, saved) {
   const svg = document.getElementById('growth-svg');
   svg.innerHTML = '';
-  const maxVal  = n * W;
-  const chartW  = 460, chartH = 90, padL = 30, padB = 25;
-
+  const maxVal = n * W, chartW = 460, chartH = 90, padL = 30, padB = 25;
   function bar(x, y, w, h, fill, lbl, val) {
     const r = document.createElementNS('http://www.w3.org/2000/svg', 'rect');
-    r.setAttribute('x', x); r.setAttribute('y', y);
-    r.setAttribute('width', w); r.setAttribute('height', h);
-    r.setAttribute('fill', fill); r.setAttribute('rx', '3');
-    svg.appendChild(r);
+    r.setAttribute('x', x); r.setAttribute('y', y); r.setAttribute('width', w); r.setAttribute('height', h);
+    r.setAttribute('fill', fill); r.setAttribute('rx', '3'); svg.appendChild(r);
     const t = document.createElementNS('http://www.w3.org/2000/svg', 'text');
-    t.setAttribute('x', x + w / 2); t.setAttribute('y', y - 4);
-    t.setAttribute('text-anchor', 'middle');
-    t.setAttribute('fill', '#ccc'); t.setAttribute('font-size', '10');
-    t.textContent = val;
-    svg.appendChild(t);
+    t.setAttribute('x', x + w/2); t.setAttribute('y', y - 4); t.setAttribute('text-anchor', 'middle');
+    t.setAttribute('fill', '#ccc'); t.setAttribute('font-size', '10'); t.textContent = val; svg.appendChild(t);
     const l = document.createElementNS('http://www.w3.org/2000/svg', 'text');
-    l.setAttribute('x', x + w / 2); l.setAttribute('y', chartH + padB - 5);
-    l.setAttribute('text-anchor', 'middle');
-    l.setAttribute('fill', '#888'); l.setAttribute('font-size', '9');
-    l.textContent = lbl;
-    svg.appendChild(l);
+    l.setAttribute('x', x + w/2); l.setAttribute('y', chartH + padB - 5); l.setAttribute('text-anchor', 'middle');
+    l.setAttribute('fill', '#888'); l.setAttribute('font-size', '9'); l.textContent = lbl; svg.appendChild(l);
   }
-
   const scale = maxVal > 0 ? (chartH - 20) / maxVal : 1;
-  const theoH = maxVal * scale;
-  const actH  = Math.min(actualOps * scale, theoH);
-  const savH  = Math.min(saved * scale, theoH);
-
-  bar(padL + 20,  chartH - theoH, 60, theoH, '#3a3a3a', 'Theoretical O(n*W) = ' + maxVal, maxVal);
-  bar(padL + 110, chartH - actH,  60, actH,  '#03dac6', 'Actual Ops = ' + actualOps,       actualOps);
-  bar(padL + 200, chartH - savH,  60, savH,  '#bb86fc', 'Saved (sorting) = ' + saved,      saved);
-
+  const theoH = maxVal * scale, actH = Math.min(actualOps * scale, theoH), savH = Math.min(saved * scale, theoH);
+  bar(padL+20,  chartH-theoH, 60, theoH, '#3a3a3a', 'Theoretical O(n*W)='+maxVal, maxVal);
+  bar(padL+110, chartH-actH,  60, actH,  '#03dac6', 'Actual Ops='+actualOps,       actualOps);
+  bar(padL+200, chartH-savH,  60, savH,  '#bb86fc', 'Saved(sorting)='+saved,       saved);
   const axis = document.createElementNS('http://www.w3.org/2000/svg', 'line');
-  axis.setAttribute('x1', padL); axis.setAttribute('y1', 0);
-  axis.setAttribute('x2', padL); axis.setAttribute('y2', chartH);
-  axis.setAttribute('stroke', '#444'); axis.setAttribute('stroke-width', '1');
-  svg.appendChild(axis);
+  axis.setAttribute('x1', padL); axis.setAttribute('y1', 0); axis.setAttribute('x2', padL); axis.setAttribute('y2', chartH);
+  axis.setAttribute('stroke', '#444'); axis.setAttribute('stroke-width', '1'); svg.appendChild(axis);
   const axisX = document.createElementNS('http://www.w3.org/2000/svg', 'line');
-  axisX.setAttribute('x1', padL); axisX.setAttribute('y1', chartH);
-  axisX.setAttribute('x2', chartW); axisX.setAttribute('y2', chartH);
-  axisX.setAttribute('stroke', '#444'); axisX.setAttribute('stroke-width', '1');
-  svg.appendChild(axisX);
+  axisX.setAttribute('x1', padL); axisX.setAttribute('y1', chartH); axisX.setAttribute('x2', chartW); axisX.setAttribute('y2', chartH);
+  axisX.setAttribute('stroke', '#444'); axisX.setAttribute('stroke-width', '1'); svg.appendChild(axisX);
 }
 
 // =============================================
@@ -1467,32 +1338,27 @@ function updateCLOStats(ops, n, W, saved, amount) {
 // =============================================
 function runComparison() {
   syncHiddenInput();
-  const coins  = getCoinsFromInputs();
+  const coins = getCoinsFromInputs();
   const amount = parseInt(document.getElementById('amount-input').value, 10);
   if (coins.length === 0 || isNaN(amount)) return;
-
   const gRes = coinChangeGreedy(coins, amount);
   const dRes = coinChangeDP(coins, amount);
-  const dpAns  = dRes.result;
-  const dpPath = dRes.path;
-
+  const dpAns = dRes.result, dpPath = dRes.path;
   document.getElementById('compare-row').style.display = 'grid';
   document.getElementById('comparison-conclusion').style.display = 'block';
-
   document.getElementById('greedy-coins').textContent = gRes.success ? gRes.coins.join(' + ') : 'No solution found';
   document.getElementById('greedy-count').textContent = gRes.success ? gRes.count : 'X';
   document.getElementById('dp-coins').textContent     = dpAns !== Infinity ? dpPath.join(' + ') : 'No solution found';
   document.getElementById('dp-count').textContent     = dpAns !== Infinity ? dpAns : 'X';
-
   const el = document.getElementById('comparison-conclusion');
   if (!gRes.success && dpAns !== Infinity) {
-    el.innerHTML = '<strong style="color:#03dac6">Conclusion:</strong> Greedy completely failed — it could not find any solution. DP found the optimal answer. This proves DP is necessary for this coin set.';
+    el.innerHTML = '<strong style="color:#03dac6">Conclusion:</strong> Greedy completely failed — it found no solution at all. DP found the optimal answer (' + dpAns + ' coins). This proves DP is essential for this coin set.';
   } else if (gRes.success && dpAns !== Infinity && gRes.count > dpAns) {
     el.innerHTML = '<strong style="color:#ffb74d">Conclusion:</strong> Greedy found a solution (' + gRes.count + ' coins) but it is <strong>NOT optimal</strong>. DP found a better solution (' + dpAns + ' coins). This is the classic counterexample proving Greedy is insufficient for arbitrary coin sets.';
   } else if (gRes.success && dpAns !== Infinity && gRes.count === dpAns) {
-    el.innerHTML = '<strong style="color:#4caf50">Conclusion:</strong> For this specific input, both algorithms found the same optimal answer (' + dpAns + ' coins). Try the <strong>"Greedy Fails (6)"</strong> preset to see where Greedy fails!';
+    el.innerHTML = '<strong style="color:#4caf50">Conclusion:</strong> For this input, both algorithms found the same optimal answer (' + dpAns + ' coins). This coin set satisfies the Greedy Property. Try <strong>"Greedy Fails (6)"</strong> to see a case where Greedy gives the wrong answer.';
   } else {
-    el.innerHTML = '<strong style="color:#888">Conclusion:</strong> Neither algorithm could find a valid solution for this input.';
+    el.innerHTML = '<strong style="color:#888">Conclusion:</strong> Neither algorithm found a valid solution for this input (the problem is impossible).';
   }
 }
 
@@ -1519,9 +1385,7 @@ function jumpToStep(idx) {
   if (idx < 0 || idx >= steps.length) return;
   drawDPTable(lastAmount);
   document.getElementById('history-tbody').innerHTML = '';
-  for (let i = 0; i <= idx; i++) {
-    renderStep(steps[i], i);
-  }
+  for (let i = 0; i <= idx; i++) renderStep(steps[i], i);
   stepIdx = idx + 1;
   document.getElementById('stat-step').textContent = stepIdx + ' / ' + steps.length;
   document.querySelectorAll('#history-table tr').forEach(r => r.classList.remove('active-row'));
@@ -1530,8 +1394,7 @@ function jumpToStep(idx) {
 }
 
 function typeColor(t) {
-  const map = { init:'#888', outer:'#03dac6', compare:'#cf6679', update:'#bb86fc', break:'#ffb74d', done:'#4caf50' };
-  return map[t] || '#888';
+  return { init:'#888', outer:'#03dac6', compare:'#cf6679', update:'#bb86fc', break:'#ffb74d', done:'#4caf50' }[t] || '#888';
 }
 
 // =============================================
@@ -1549,10 +1412,8 @@ function highlightLine(lineNum) {
 // =============================================
 function playAnim() {
   if (stepIdx >= steps.length) return;
-  setStatus('Playing');
-  setButtons('playing');
-  const speed = parseFloat(document.getElementById('speed-slider').value);
-  const delay = Math.round(800 / speed);
+  setStatus('Playing'); setButtons('playing');
+  const delay = Math.round(800 / parseFloat(document.getElementById('speed-slider').value));
   playTimer = setInterval(() => {
     if (stepIdx >= steps.length) { pauseAnim(); setStatus('Complete'); setButtons('done'); return; }
     stepForward();
@@ -1560,20 +1421,18 @@ function playAnim() {
 }
 
 function pauseAnim() {
-  clearInterval(playTimer);
-  playTimer = null;
+  clearInterval(playTimer); playTimer = null;
   if (stepIdx < steps.length && steps.length > 0) setStatus('Paused');
   setButtons('paused');
 }
 
 function resetAll(redraw) {
   if (redraw === undefined) redraw = true;
-  pauseAnim();
-  steps = []; stepIdx = 0;
+  pauseAnim(); steps = []; stepIdx = 0;
   if (redraw) {
     document.getElementById('dp-svg').innerHTML = '';
     document.getElementById('history-tbody').innerHTML = '';
-    document.getElementById('explanation-box').innerHTML = 'Welcome! Enter coins and a target amount, then click <strong>Build Steps</strong> to begin.';
+    document.getElementById('explanation-box').innerHTML = 'Welcome! This box will explain every single step of the algorithm in plain English as it runs. Start by clicking a <strong>Preset</strong> on the left, then click <strong>Build Steps</strong>, then <strong>Play</strong>.';
     document.getElementById('stat-step').textContent    = '0 / 0';
     document.getElementById('stat-ops').textContent     = '0';
     document.getElementById('stat-saved').textContent   = '0';
@@ -1586,9 +1445,7 @@ function resetAll(redraw) {
     document.getElementById('compare-row').style.display = 'none';
     document.getElementById('comparison-conclusion').style.display = 'none';
     document.getElementById('growth-svg').innerHTML = '';
-    highlightLine(null);
-    setStatus('Idle');
-    setButtons('idle');
+    highlightLine(null); setStatus('Idle'); setButtons('idle');
   }
 }
 
@@ -1596,21 +1453,14 @@ function resetAll(redraw) {
 // PRESETS
 // =============================================
 function loadPreset(coins, amount) {
-  // Set number of coins field
   document.getElementById('num-coins').value = coins.length;
-  // Generate coin input fields
   generateCoinInputs();
-  // Fill in coin values
   const inputs = document.getElementById('coin-values-grid').querySelectorAll('input');
   coins.forEach((v, i) => { if (inputs[i]) inputs[i].value = v; });
-  // Set amount
   document.getElementById('amount-input').value = amount;
-  // Sync hidden input
   syncHiddenInput();
-  // Reset visualization
   resetAll(true);
-  // Auto-draw recursion tree for new preset
-  drawRecursionTree(coins, amount);
+  drawRecursionTree(coins, amount);  // Immediately show tree for new preset
 }
 
 // =============================================
@@ -1618,25 +1468,22 @@ function loadPreset(coins, amount) {
 // =============================================
 function setStatus(s) { document.getElementById('stat-status').textContent = s; }
 function setExplanation(html) { document.getElementById('explanation-box').innerHTML = html; }
-
 function setButtons(state) {
   const b = id => document.getElementById(id);
-  b('btn-build').disabled  = state === 'playing';
-  b('btn-step').disabled   = state === 'idle' || state === 'playing' || state === 'done';
-  b('btn-play').disabled   = state === 'idle' || state === 'playing' || state === 'done';
-  b('btn-pause').disabled  = state !== 'playing';
-  b('btn-reset').disabled  = state === 'idle';
+  b('btn-build').disabled = state === 'playing';
+  b('btn-step').disabled  = state === 'idle' || state === 'playing' || state === 'done';
+  b('btn-play').disabled  = state === 'idle' || state === 'playing' || state === 'done';
+  b('btn-pause').disabled = state !== 'playing';
+  b('btn-reset').disabled = state === 'idle';
 }
 
 // =============================================
 // INIT ON LOAD
 // =============================================
 window.onload = function() {
-  // Generate default coin inputs (3 coins: 1, 3, 4)
-  generateCoinInputs();
-  // Draw initial recursion tree for default input
-  drawRecursionTree([1, 3, 4], 6);
-  drawGrowthChart(0, 3, 6, 0);
+  generateCoinInputs();              // Build default coin fields (1, 3, 4)
+  drawRecursionTree([1, 3, 4], 6);   // Show default tree immediately
+  drawGrowthChart(0, 3, 6, 0);       // Show empty growth chart
 };
 </script>
 </body>
