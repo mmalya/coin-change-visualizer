@@ -258,7 +258,26 @@
 
     /* ── SVG WRAPPERS ── */
     #dp-svg-wrap { overflow-x: auto; padding-bottom: 6px; }
-    #tree-svg-wrap { overflow-x: auto; overflow-y: auto; max-height: 360px; padding-bottom: 6px; }
+    #tree-svg-wrap { overflow-x: auto; overflow-y: auto; max-height: 400px; padding-bottom: 6px; }
+
+    /* ── TREE ANIMATION CONTROLS ── */
+    .tree-controls {
+      display: flex; flex-wrap: wrap; align-items: center; gap: 8px; margin-bottom: 10px;
+    }
+    .tree-stat-row {
+      display: flex; flex-wrap: wrap; gap: 8px; margin-bottom: 10px;
+    }
+    .tree-stat {
+      background: #111; border: 1px solid var(--border); border-radius: 5px;
+      padding: 5px 10px; text-align: center; min-width: 90px;
+    }
+    .tree-stat-num { font-size: 1rem; font-weight: 700; color: var(--accent); }
+    .tree-stat-lbl { font-size: 0.62rem; color: var(--muted); margin-top: 1px; }
+    .tree-explanation {
+      background: #111; border: 1px solid var(--border); border-radius: 6px;
+      padding: 8px 12px; font-size: 0.82rem; line-height: 1.6; color: var(--text);
+      margin-bottom: 8px; min-height: 36px;
+    }
 
     /* ── HISTORY TABLE ── */
     .history-wrap {
@@ -554,14 +573,39 @@
 
     <!-- Recursion Tree -->
     <div class="card">
-      <div class="card-title">&#127795; Recursion Tree &#8212; Why Naive Recursion is Slow</div>
-      <p style="font-size:0.75rem;color:var(--muted);margin-bottom:8px;">
-        This tree shows what a <strong>naive recursive</strong> approach would do for your current input.
-        Each node is a subproblem (an amount to solve). Branches show which coin was subtracted.
-        <strong style="color:var(--warn)">Orange-dashed nodes</strong> are subproblems computed more than once &#8212; these are <strong>overlapping subproblems</strong>.
-        DP eliminates all redundancy by storing each answer exactly once.
-        <em>The tree updates automatically as you change the input.</em>
+      <div class="card-title">&#127795; Recursion Tree &#8212; Animated Naive Recursion vs DP</div>
+      <p style="font-size:0.75rem;color:var(--muted);margin-bottom:10px;">
+        This tree animates the <strong>naive recursive</strong> algorithm exploring your input in DFS order &#8212; exactly how a real call stack works.
+        Watch how the same sub-amounts are visited <strong style="color:var(--warn)">multiple times</strong> (orange dashed = repeated subproblem).
+        DP stores each answer once and never repeats. Use the controls below to step through or play the recursion.
       </p>
+
+      <!-- Tree playback controls -->
+      <div class="tree-controls">
+        <button class="btn-primary"  id="tree-btn-build" onclick="buildTreeAnim()">&#9654; Animate Tree</button>
+        <button class="btn-secondary" id="tree-btn-step"  onclick="treeStepForward()" disabled>Step &#9654;</button>
+        <button class="btn-success"  id="tree-btn-play"  onclick="treePlay()" disabled>Play &#9654;&#9654;</button>
+        <button class="btn-warn"     id="tree-btn-pause" onclick="treePause()" disabled>Pause &#9646;&#9646;</button>
+        <button class="btn-danger"   id="tree-btn-reset" onclick="treeReset()" disabled>Reset &#8634;</button>
+        <span style="font-size:0.75rem;color:var(--muted);">Speed:</span>
+        <input type="range" id="tree-speed" min="0.25" max="4" step="0.25" value="1" style="width:80px;accent-color:var(--accent);"
+               oninput="document.getElementById('tree-speed-lbl').textContent=this.value+'x'"/>
+        <span id="tree-speed-lbl" style="font-size:0.75rem;color:var(--muted);">1x</span>
+      </div>
+
+      <!-- Tree live stats -->
+      <div class="tree-stat-row">
+        <div class="tree-stat"><div class="tree-stat-num" id="tree-stat-calls">0</div><div class="tree-stat-lbl">Recursive Calls</div></div>
+        <div class="tree-stat"><div class="tree-stat-num" id="tree-stat-repeated" style="color:var(--warn);">0</div><div class="tree-stat-lbl">Repeated Subproblems</div></div>
+        <div class="tree-stat"><div class="tree-stat-num" id="tree-stat-dp" style="color:var(--accent2);">0</div><div class="tree-stat-lbl">DP Would Make (unique)</div></div>
+        <div class="tree-stat"><div class="tree-stat-num" id="tree-stat-step">0 / 0</div><div class="tree-stat-lbl">Step</div></div>
+      </div>
+
+      <!-- Tree step explanation -->
+      <div class="tree-explanation" id="tree-explanation">
+        Click <strong>Animate Tree</strong> to watch the naive recursive algorithm explore your input node by node.
+      </div>
+
       <div id="tree-svg-wrap">
         <svg id="tree-svg" width="560" height="220" viewBox="0 0 560 220"></svg>
       </div>
@@ -1170,61 +1214,98 @@ function updateDPTable(dpState, activeAmt, activeCoin, type) {
 }
 
 // =============================================
-// DRAW RECURSION TREE (SVG — FULLY DYNAMIC)
-// Generates the actual recursive call tree for
-// the current coins and amount. Updates live on
-// every input change. Annotates overlapping
-// subproblems with orange dashed borders.
+// TREE ANIMATION STATE
 // =============================================
-function drawRecursionTree(coins, amount) {
-  const svgEl = document.getElementById('tree-svg');
-  svgEl.innerHTML = '';
+let treeNodes = [], treeEdges = [], treeSteps = [];
+let treeStepIdx = 0, treePlayTimer = null;
+let treeNodeById = {};
 
-  const MAX_DEPTH = 4, MAX_NODES = 80;
+// =============================================
+// BUILD TREE DATA (DFS ORDER) FOR ANIMATION
+// Generates nodes in DFS traversal order so the
+// animation reveals them exactly as a call stack
+// would — going deep before going wide.
+// =============================================
+function buildTreeData(coins, amount) {
+  const MAX_DEPTH = 4, MAX_NODES = 90;
   const sortedCoins = [...coins].sort((a, b) => a - b);
+  const nodes = [], edges = [], steps = [];
+  let nodeId = 0;
+  const seenAmounts = {}; // track how many times each amount is visited
 
-  // Build tree via BFS
-  const nodes = [], edges = [];
-  let nodeId = 0, nodeCount = 0;
-  const queue = [{ amount: amount, depth: 0, parentId: null, coinUsed: null }];
-  while (queue.length > 0 && nodeCount < MAX_NODES) {
-    const { amount: amt, depth, parentId, coinUsed } = queue.shift();
+  // DFS to build nodes in call-stack order
+  function dfs(amt, depth, parentId, coinUsed) {
+    if (nodes.length >= MAX_NODES) return;
     const id = nodeId++;
-    nodes.push({ id, amount: amt, depth, parentId, coinUsed });
-    nodeCount++;
-    if (parentId !== null) edges.push({ from: parentId, to: id, coin: coinUsed });
+    const firstSeen = !seenAmounts[amt];
+    seenAmounts[amt] = (seenAmounts[amt] || 0) + 1;
+    const isRepeated = seenAmounts[amt] > 1;
+    nodes.push({ id, amount: amt, depth, parentId, coinUsed, isRepeated, firstSeen });
+    if (parentId !== null) edges.push({ from: parentId, to: id, coin: coinUsed, edgeId: id });
+
+    // Each node reveal is one step
+    steps.push({
+      revealNode: id,
+      revealEdge: parentId !== null ? id : null,
+      isRepeated,
+      isBase: amt === 0,
+      amount: amt,
+      depth,
+      coin: coinUsed,
+      callsSoFar: nodes.length,
+      repeatedSoFar: nodes.filter(n => n.isRepeated).length
+    });
+
     if (depth < MAX_DEPTH && amt > 0) {
-      for (const c of sortedCoins) { if (c <= amt) queue.push({ amount: amt - c, depth: depth + 1, parentId: id, coinUsed: c }); }
+      for (const c of sortedCoins) {
+        if (c <= amt) dfs(amt - c, depth + 1, id, c);
+      }
     }
   }
 
-  // Assign positions
+  dfs(amount, 0, null, null);
+  return { nodes, edges, steps, sortedCoins };
+}
+
+// =============================================
+// ASSIGN POSITIONS TO TREE NODES
+// =============================================
+function assignTreePositions(nodes) {
   const byDepth = {};
   nodes.forEach(n => { if (!byDepth[n.depth]) byDepth[n.depth] = []; byDepth[n.depth].push(n); });
-  const maxDepth = Math.max(...nodes.map(n => n.depth));
   const levelH = 72, nodeR = 18, padX = 30;
   nodes.forEach(n => {
     const peers = byDepth[n.depth], idx = peers.indexOf(n), total = peers.length;
-    const spacing = Math.max(44, Math.min(80, 560 / Math.max(total, 1)));
+    const spacing = Math.max(42, Math.min(78, 560 / Math.max(total, 1)));
     const totalW = spacing * (total - 1);
     const startX = Math.max(padX + nodeR, 280 - totalW / 2);
     n.x = startX + idx * spacing;
     n.y = 30 + n.depth * levelH;
   });
+}
 
-  const svgW = Math.max(560, Math.max(...nodes.map(n => n.x)) + padX + nodeR + 20);
-  const svgH = Math.max(220, (maxDepth + 1) * levelH + 60);
-  svgEl.setAttribute('width', svgW); svgEl.setAttribute('height', svgH);
-  svgEl.setAttribute('viewBox', '0 0 ' + svgW + ' ' + svgH);
+// =============================================
+// DRAW RECURSION TREE — STATIC SNAPSHOT
+// Used for live-update preview (no animation)
+// =============================================
+function drawRecursionTree(coins, amount) {
+  const svgEl = document.getElementById('tree-svg');
+  svgEl.innerHTML = '';
 
-  // Find repeated amounts
-  const amtCount = {};
-  nodes.forEach(n => { amtCount[n.amount] = (amtCount[n.amount] || 0) + 1; });
-  const repeated = new Set(Object.keys(amtCount).filter(k => amtCount[k] > 1).map(Number));
+  const { nodes, edges } = buildTreeData(coins, amount);
+  assignTreePositions(nodes);
+
   const nodeById = {};
   nodes.forEach(n => { nodeById[n.id] = n; });
 
-  // Draw edges
+  const maxDepth = nodes.length > 0 ? Math.max(...nodes.map(n => n.depth)) : 0;
+  const nodeR = 18, padX = 30;
+  const svgW = Math.max(560, Math.max(...nodes.map(n => n.x || 280)) + padX + nodeR + 20);
+  const svgH = Math.max(220, (maxDepth + 1) * 72 + 60);
+  svgEl.setAttribute('width', svgW); svgEl.setAttribute('height', svgH);
+  svgEl.setAttribute('viewBox', '0 0 ' + svgW + ' ' + svgH);
+
+  // Draw all edges
   edges.forEach(e => {
     const src = nodeById[e.from], dst = nodeById[e.to];
     if (!src || !dst) return;
@@ -1239,15 +1320,14 @@ function drawRecursionTree(coins, amount) {
     lt.textContent = '-' + e.coin; svgEl.appendChild(lt);
   });
 
-  // Draw nodes
+  // Draw all nodes
   nodes.forEach(n => {
-    const isRepeated = repeated.has(n.amount) && n.id !== 0;
     const isBase = n.amount === 0;
     const circle = document.createElementNS('http://www.w3.org/2000/svg', 'circle');
     circle.setAttribute('cx', n.x); circle.setAttribute('cy', n.y); circle.setAttribute('r', nodeR);
     circle.setAttribute('fill', isBase ? '#4caf50' : '#3700b3');
-    circle.setAttribute('stroke', isRepeated ? '#ffb74d' : '#555');
-    circle.setAttribute('stroke-width', isRepeated ? '2.5' : '1.5');
+    circle.setAttribute('stroke', n.isRepeated ? '#ffb74d' : '#555');
+    circle.setAttribute('stroke-width', n.isRepeated ? '2.5' : '1.5');
     svgEl.appendChild(circle);
     const txt = document.createElementNS('http://www.w3.org/2000/svg', 'text');
     txt.setAttribute('x', n.x); txt.setAttribute('y', n.y + 5);
@@ -1255,7 +1335,7 @@ function drawRecursionTree(coins, amount) {
     txt.setAttribute('font-size', '12'); txt.setAttribute('font-weight', '700');
     txt.setAttribute('font-family', 'Courier New, monospace');
     txt.textContent = n.amount; svgEl.appendChild(txt);
-    if (isRepeated) {
+    if (n.isRepeated) {
       const box = document.createElementNS('http://www.w3.org/2000/svg', 'rect');
       box.setAttribute('x', n.x - nodeR - 5); box.setAttribute('y', n.y - nodeR - 5);
       box.setAttribute('width', (nodeR + 5) * 2); box.setAttribute('height', (nodeR + 5) * 2);
@@ -1265,7 +1345,253 @@ function drawRecursionTree(coins, amount) {
     }
   });
 
-  // Legend
+  drawTreeLegend(svgEl, svgW, svgH);
+  if (nodes.length >= 90) drawTreeTruncNotice(svgEl, svgW, svgH);
+}
+
+// =============================================
+// BUILD TREE ANIMATION — sets up animated steps
+// =============================================
+function buildTreeAnim() {
+  treePause();
+  const coins = getCoinsFromInputs();
+  const amount = parseInt(document.getElementById('amount-input').value, 10);
+  if (coins.length === 0 || isNaN(amount) || amount < 0) {
+    alert('Please enter valid coins and amount first.'); return;
+  }
+
+  const data = buildTreeData(coins, amount);
+  treeNodes = data.nodes;
+  treeEdges = data.edges;
+  treeSteps = data.steps;
+  treeStepIdx = 0;
+  treeNodeById = {};
+  treeNodes.forEach(n => { treeNodeById[n.id] = n; });
+
+  assignTreePositions(treeNodes);
+
+  // Compute SVG dimensions
+  const maxDepth = treeNodes.length > 0 ? Math.max(...treeNodes.map(n => n.depth)) : 0;
+  const nodeR = 18, padX = 30;
+  const svgW = Math.max(560, Math.max(...treeNodes.map(n => n.x || 280)) + padX + nodeR + 20);
+  const svgH = Math.max(220, (maxDepth + 1) * 72 + 60);
+
+  // Clear SVG and draw skeleton (invisible edges and nodes)
+  const svgEl = document.getElementById('tree-svg');
+  svgEl.innerHTML = '';
+  svgEl.setAttribute('width', svgW); svgEl.setAttribute('height', svgH);
+  svgEl.setAttribute('viewBox', '0 0 ' + svgW + ' ' + svgH);
+
+  // Pre-create all edges (hidden initially)
+  treeEdges.forEach(e => {
+    const src = treeNodeById[e.from], dst = treeNodeById[e.to];
+    if (!src || !dst) return;
+    const g = document.createElementNS('http://www.w3.org/2000/svg', 'g');
+    g.setAttribute('id', 'tree-edge-' + e.edgeId);
+    g.setAttribute('opacity', '0');
+    const l = document.createElementNS('http://www.w3.org/2000/svg', 'line');
+    l.setAttribute('x1', src.x); l.setAttribute('y1', src.y + nodeR);
+    l.setAttribute('x2', dst.x); l.setAttribute('y2', dst.y - nodeR);
+    l.setAttribute('stroke', '#444'); l.setAttribute('stroke-width', '1.5');
+    g.appendChild(l);
+    const lt = document.createElementNS('http://www.w3.org/2000/svg', 'text');
+    lt.setAttribute('x', (src.x + dst.x) / 2 + 4); lt.setAttribute('y', (src.y + dst.y) / 2);
+    lt.setAttribute('text-anchor', 'start'); lt.setAttribute('fill', '#666'); lt.setAttribute('font-size', '9');
+    lt.textContent = '-' + e.coin; g.appendChild(lt);
+    svgEl.appendChild(g);
+  });
+
+  // Pre-create all node groups (hidden initially)
+  treeNodes.forEach(n => {
+    const g = document.createElementNS('http://www.w3.org/2000/svg', 'g');
+    g.setAttribute('id', 'tree-node-' + n.id);
+    g.setAttribute('opacity', '0');
+    const circle = document.createElementNS('http://www.w3.org/2000/svg', 'circle');
+    circle.setAttribute('cx', n.x); circle.setAttribute('cy', n.y); circle.setAttribute('r', nodeR);
+    circle.setAttribute('fill', n.amount === 0 ? '#4caf50' : '#3700b3');
+    circle.setAttribute('stroke', '#555'); circle.setAttribute('stroke-width', '1.5');
+    circle.setAttribute('id', 'tree-circle-' + n.id);
+    g.appendChild(circle);
+    const txt = document.createElementNS('http://www.w3.org/2000/svg', 'text');
+    txt.setAttribute('x', n.x); txt.setAttribute('y', n.y + 5);
+    txt.setAttribute('text-anchor', 'middle'); txt.setAttribute('fill', n.amount === 0 ? '#000' : '#fff');
+    txt.setAttribute('font-size', '12'); txt.setAttribute('font-weight', '700');
+    txt.setAttribute('font-family', 'Courier New, monospace');
+    txt.textContent = n.amount; g.appendChild(txt);
+    svgEl.appendChild(g);
+  });
+
+  drawTreeLegend(svgEl, svgW, svgH);
+  if (treeNodes.length >= 90) drawTreeTruncNotice(svgEl, svgW, svgH);
+
+  // Update stats
+  const uniqueAmounts = new Set(treeNodes.map(n => n.amount)).size;
+  document.getElementById('tree-stat-calls').textContent = '0';
+  document.getElementById('tree-stat-repeated').textContent = '0';
+  document.getElementById('tree-stat-dp').textContent = uniqueAmounts;
+  document.getElementById('tree-stat-step').textContent = '0 / ' + treeSteps.length;
+  document.getElementById('tree-explanation').innerHTML =
+    'Tree ready! <strong>' + treeSteps.length + '</strong> recursive calls total. ' +
+    'DP only needs <strong style="color:var(--accent2)">' + uniqueAmounts + '</strong> unique computations. ' +
+    'Click <strong>Step</strong> or <strong>Play</strong> to animate.';
+
+  treeSetButtons('ready');
+}
+
+// =============================================
+// REVEAL ONE TREE STEP
+// =============================================
+function treeStepForward() {
+  if (treeStepIdx >= treeSteps.length) return;
+  const s = treeSteps[treeStepIdx];
+  treeStepIdx++;
+
+  // Un-highlight all previously active nodes
+  treeNodes.forEach(n => {
+    const circ = document.getElementById('tree-circle-' + n.id);
+    if (!circ) return;
+    // Restore to settled color
+    if (n.amount === 0) {
+      circ.setAttribute('fill', '#4caf50');
+      circ.setAttribute('stroke', '#4caf50');
+    } else if (n.isRepeated) {
+      circ.setAttribute('fill', '#5a2000');
+      circ.setAttribute('stroke', '#ffb74d');
+      circ.setAttribute('stroke-width', '2.5');
+    } else {
+      circ.setAttribute('fill', '#3700b3');
+      circ.setAttribute('stroke', '#555');
+      circ.setAttribute('stroke-width', '1.5');
+    }
+  });
+
+  // Reveal edge
+  if (s.revealEdge !== null) {
+    const edgeG = document.getElementById('tree-edge-' + s.revealEdge);
+    if (edgeG) edgeG.setAttribute('opacity', '1');
+  }
+
+  // Reveal node
+  const nodeG = document.getElementById('tree-node-' + s.revealNode);
+  if (nodeG) nodeG.setAttribute('opacity', '1');
+
+  // Highlight active node
+  const circ = document.getElementById('tree-circle-' + s.revealNode);
+  if (circ) {
+    if (s.isBase) {
+      circ.setAttribute('fill', '#00e676');   // bright green flash
+      circ.setAttribute('stroke', '#00e676');
+      circ.setAttribute('stroke-width', '3');
+    } else if (s.isRepeated) {
+      circ.setAttribute('fill', '#ff6d00');   // orange flash for repeated
+      circ.setAttribute('stroke', '#ffb74d');
+      circ.setAttribute('stroke-width', '3');
+      // Add dashed ring if not already there
+      const nodeGEl = document.getElementById('tree-node-' + s.revealNode);
+      if (nodeGEl && !nodeGEl.querySelector('rect.repeat-ring')) {
+        const nodeR = 18;
+        const box = document.createElementNS('http://www.w3.org/2000/svg', 'rect');
+        box.setAttribute('class', 'repeat-ring');
+        const n = treeNodeById[s.revealNode];
+        box.setAttribute('x', n.x - nodeR - 5); box.setAttribute('y', n.y - nodeR - 5);
+        box.setAttribute('width', (nodeR + 5) * 2); box.setAttribute('height', (nodeR + 5) * 2);
+        box.setAttribute('rx', nodeR + 5); box.setAttribute('fill', 'none');
+        box.setAttribute('stroke', '#ffb74d'); box.setAttribute('stroke-width', '1.5');
+        box.setAttribute('stroke-dasharray', '4,3');
+        nodeGEl.insertBefore(box, nodeGEl.firstChild);
+      }
+    } else {
+      circ.setAttribute('fill', '#ffd600');   // yellow flash for new call
+      circ.setAttribute('stroke', '#ffd600');
+      circ.setAttribute('stroke-width', '3');
+    }
+  }
+
+  // Update stats
+  const repeatedSoFar = treeSteps.slice(0, treeStepIdx).filter(st => st.isRepeated).length;
+  document.getElementById('tree-stat-calls').textContent = treeStepIdx;
+  document.getElementById('tree-stat-repeated').textContent = repeatedSoFar;
+  document.getElementById('tree-stat-step').textContent = treeStepIdx + ' / ' + treeSteps.length;
+
+  // Update explanation
+  let msg = '';
+  if (s.isBase) {
+    msg = '&#9989; <strong>Base case reached!</strong> Amount = 0. This call returns 0 — no more coins needed. ' +
+          '(Call #' + treeStepIdx + ')';
+  } else if (s.isRepeated) {
+    msg = '<span style="color:var(--warn)">&#9888; Repeated subproblem!</span> Amount <strong>' + s.amount +
+          '</strong> has already been computed before in this tree. Naive recursion recomputes it anyway — ' +
+          'DP would just look it up instantly. (Call #' + treeStepIdx + ', Repeated: ' + repeatedSoFar + ')';
+  } else if (s.depth === 0) {
+    msg = '&#128308; <strong>Root call:</strong> coinChange(' + s.amount + '). The algorithm starts here and will try subtracting each coin.';
+  } else {
+    msg = '&#128309; <strong>Recursive call:</strong> coinChange(' + s.amount + ') — reached by subtracting coin <strong>' +
+          s.coin + '</strong> from parent. Depth = ' + s.depth + '. (Call #' + treeStepIdx + ')';
+  }
+  document.getElementById('tree-explanation').innerHTML = msg;
+
+  if (treeStepIdx >= treeSteps.length) {
+    const totalRepeated = treeSteps.filter(st => st.isRepeated).length;
+    const uniqueAmounts = new Set(treeNodes.map(n => n.amount)).size;
+    document.getElementById('tree-explanation').innerHTML =
+      '&#127881; <strong>Animation complete!</strong> Naive recursion made <strong>' + treeSteps.length +
+      '</strong> calls, of which <strong style="color:var(--warn)">' + totalRepeated +
+      '</strong> were repeated subproblems. DP only needs <strong style="color:var(--accent2)">' +
+      uniqueAmounts + '</strong> unique computations — eliminating all redundancy.';
+    treeSetButtons('done');
+    treePause();
+  }
+}
+
+// =============================================
+// TREE PLAY / PAUSE / RESET
+// =============================================
+function treePlay() {
+  if (treeStepIdx >= treeSteps.length) return;
+  treeSetButtons('playing');
+  const delay = Math.round(700 / parseFloat(document.getElementById('tree-speed').value));
+  treePlayTimer = setInterval(() => {
+    if (treeStepIdx >= treeSteps.length) { treePause(); treeSetButtons('done'); return; }
+    treeStepForward();
+  }, delay);
+}
+
+function treePause() {
+  clearInterval(treePlayTimer); treePlayTimer = null;
+  if (treeSteps.length > 0 && treeStepIdx < treeSteps.length) treeSetButtons('paused');
+}
+
+function treeReset() {
+  treePause();
+  treeStepIdx = 0;
+  treeSteps = []; treeNodes = []; treeEdges = [];
+  document.getElementById('tree-svg').innerHTML = '';
+  document.getElementById('tree-stat-calls').textContent = '0';
+  document.getElementById('tree-stat-repeated').textContent = '0';
+  document.getElementById('tree-stat-dp').textContent = '0';
+  document.getElementById('tree-stat-step').textContent = '0 / 0';
+  document.getElementById('tree-explanation').innerHTML =
+    'Click <strong>Animate Tree</strong> to watch the naive recursive algorithm explore your input node by node.';
+  treeSetButtons('idle');
+  // Redraw static preview
+  const coins = getCoinsFromInputs();
+  const amount = parseInt(document.getElementById('amount-input').value, 10);
+  if (coins.length > 0 && !isNaN(amount) && amount >= 0) drawRecursionTree(coins, amount);
+}
+
+function treeSetButtons(state) {
+  const b = id => document.getElementById(id);
+  b('tree-btn-build').disabled = state === 'playing';
+  b('tree-btn-step').disabled  = state === 'idle' || state === 'playing' || state === 'done';
+  b('tree-btn-play').disabled  = state === 'idle' || state === 'playing' || state === 'done';
+  b('tree-btn-pause').disabled = state !== 'playing';
+  b('tree-btn-reset').disabled = state === 'idle';
+}
+
+// =============================================
+// TREE LEGEND & TRUNCATION NOTICE HELPERS
+// =============================================
+function drawTreeLegend(svgEl, svgW, svgH) {
   const legendY = svgH - 18;
   function lDot(x, y, fill, stroke, dash) {
     const c = document.createElementNS('http://www.w3.org/2000/svg', 'circle');
@@ -1281,15 +1607,15 @@ function drawRecursionTree(coins, amount) {
   }
   lDot(16, legendY, '#3700b3'); lTxt(26, legendY, 'Recursive call');
   lDot(120, legendY, '#4caf50'); lTxt(130, legendY, 'Base case (0)');
-  lDot(220, legendY, '#3700b3', '#ffb74d', true); lTxt(230, legendY, 'Repeated subproblem — DP avoids recomputing this!');
+  lDot(220, legendY, '#5a2000', '#ffb74d', true); lTxt(230, legendY, 'Repeated subproblem — DP avoids recomputing this!');
+}
 
-  if (nodeCount >= MAX_NODES) {
-    const notice = document.createElementNS('http://www.w3.org/2000/svg', 'text');
-    notice.setAttribute('x', svgW / 2); notice.setAttribute('y', svgH - 4);
-    notice.setAttribute('text-anchor', 'middle'); notice.setAttribute('fill', '#ffb74d'); notice.setAttribute('font-size', '9');
-    notice.textContent = '(Tree truncated at ' + MAX_NODES + ' nodes — actual recursion is much larger for this input)';
-    svgEl.appendChild(notice);
-  }
+function drawTreeTruncNotice(svgEl, svgW, svgH) {
+  const notice = document.createElementNS('http://www.w3.org/2000/svg', 'text');
+  notice.setAttribute('x', svgW / 2); notice.setAttribute('y', svgH - 4);
+  notice.setAttribute('text-anchor', 'middle'); notice.setAttribute('fill', '#ffb74d'); notice.setAttribute('font-size', '9');
+  notice.textContent = '(Tree truncated at 90 nodes — actual recursion is much larger for this input)';
+  svgEl.appendChild(notice);
 }
 
 // =============================================
