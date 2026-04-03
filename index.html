@@ -637,6 +637,45 @@
           <svg id="growth-svg" width="500" height="130" viewBox="0 0 500 130"></svg>
         </div>
       </div>
+
+      <!-- Complexity Insight Box — appears after animation completes -->
+      <div id="complexity-insight" style="display:none;margin-top:14px;background:#1a1a2e;border:1px solid #3700b3;border-radius:8px;padding:14px;font-size:0.82rem;line-height:1.7;">
+        <div style="font-weight:700;color:var(--accent);margin-bottom:8px;">&#128161; Complexity Insight &#8212; How Input Characteristics Affect Performance</div>
+        <table style="width:100%;border-collapse:collapse;font-size:0.78rem;">
+          <thead>
+            <tr style="border-bottom:1px solid #333;">
+              <th style="text-align:left;padding:4px 8px;color:var(--muted);">Case</th>
+              <th style="text-align:left;padding:4px 8px;color:var(--muted);">Condition</th>
+              <th style="text-align:left;padding:4px 8px;color:var(--muted);">Time Complexity</th>
+              <th style="text-align:left;padding:4px 8px;color:var(--muted);">Why</th>
+            </tr>
+          </thead>
+          <tbody>
+            <tr style="border-bottom:1px solid #222;">
+              <td style="padding:5px 8px;color:#4caf50;"><strong>Best Case</strong></td>
+              <td style="padding:5px 8px;">All coins &gt; amount W</td>
+              <td style="padding:5px 8px;font-family:monospace;">O(W)</td>
+              <td style="padding:5px 8px;color:var(--muted);">Inner loop breaks at first coin for every i; only outer loop runs</td>
+            </tr>
+            <tr style="border-bottom:1px solid #222;">
+              <td style="padding:5px 8px;color:var(--warn);"><strong>Worst Case</strong></td>
+              <td style="padding:5px 8px;">Only coin is 1 (no early exit)</td>
+              <td style="padding:5px 8px;font-family:monospace;">O(n &middot; W)</td>
+              <td style="padding:5px 8px;color:var(--muted);">Every inner loop iteration runs for every i; no break ever triggers</td>
+            </tr>
+            <tr>
+              <td style="padding:5px 8px;color:var(--accent2);"><strong>Your Input</strong></td>
+              <td style="padding:5px 8px;" id="ci-condition">&#8212;</td>
+              <td style="padding:5px 8px;font-family:monospace;" id="ci-complexity">&#8212;</td>
+              <td style="padding:5px 8px;color:var(--muted);" id="ci-why">&#8212;</td>
+            </tr>
+          </tbody>
+        </table>
+        <div style="margin-top:10px;padding:8px;background:rgba(187,134,252,0.08);border-radius:6px;">
+          <span style="color:var(--accent);font-weight:600;">Key insight for the instructor:</span>
+          <span id="ci-key-insight" style="color:#ccc;">&#8212;</span>
+        </div>
+      </div>
     </div>
 
     <!-- CLO-3 -->
@@ -1155,6 +1194,7 @@ function renderStep(s, idx) {
   document.getElementById('clo-saved').textContent    = s.saved;
   if (s.type === 'done') {
     document.getElementById('stat-result').textContent = s.result === Infinity ? 'Impossible' : s.result + ' coins';
+    showComplexityInsight(lastCoins, lastAmount, s.ops, s.saved);
   }
   addHistory(idx + 1, s);
 }
@@ -1660,6 +1700,52 @@ function updateCLOStats(ops, n, W, saved, amount) {
 }
 
 // =============================================
+// COMPLEXITY INSIGHT BOX
+// =============================================
+function showComplexityInsight(coins, amount, actualOps, saved) {
+  const n = coins.length;
+  const W = amount;
+  const theoretical = n * W;
+  const efficiency = theoretical > 0 ? Math.round((saved / theoretical) * 100) : 0;
+  const sortedCoins = [...coins].sort((a, b) => a - b);
+  const minCoin = sortedCoins[0];
+
+  let condition, complexity, why, keyInsight;
+
+  if (minCoin > W) {
+    // Best case: all coins larger than amount
+    condition = 'All coins (' + sortedCoins.join(', ') + ') &gt; amount ' + W;
+    complexity = 'O(W) = O(' + W + ')';
+    why = 'Inner loop broke at first coin for every amount i. Only ' + actualOps + ' operations ran out of theoretical ' + theoretical + '.';
+    keyInsight = 'This is the best case. When all coins exceed the amount, the sorting optimization eliminates the entire inner loop for every outer iteration — effectively reducing the algorithm to O(W).';
+  } else if (n === 1 && minCoin === 1) {
+    // Worst case: only coin is 1
+    condition = 'Only 1 coin type (value = 1) — no early exit possible';
+    complexity = 'O(n · W) = O(1 × ' + W + ') = O(' + W + ')';
+    why = 'Every inner loop iteration ran for every amount. Actual ops = ' + actualOps + ' = theoretical maximum ' + theoretical + '. No comparisons were saved.';
+    keyInsight = 'This is the worst case. With only coin = 1, the inner loop never breaks early. Every amount i requires exactly 1 comparison, so the total is exactly W operations — matching the O(n · W) bound exactly.';
+  } else {
+    // Average case
+    condition = n + ' coin type(s): [' + sortedCoins.join(', ') + '], amount = ' + W;
+    complexity = 'O(n · W) = O(' + n + ' × ' + W + ') = O(' + theoretical + ') worst case';
+    why = 'Actual operations: ' + actualOps + ' out of theoretical max ' + theoretical + '. Sorting saved ' + saved + ' comparisons (' + efficiency + '% reduction).';
+    if (efficiency >= 50) {
+      keyInsight = 'The sorting optimization was highly effective here — it eliminated ' + efficiency + '% of the inner loop iterations. Larger coins relative to the amount means more early exits, bringing the actual cost well below the O(n · W) worst case.';
+    } else if (efficiency > 0) {
+      keyInsight = 'The sorting optimization saved ' + efficiency + '% of comparisons. The smallest coin (' + minCoin + ') is relatively small compared to the amount (' + W + '), so most inner loop iterations ran to completion. The worst case O(n · W) is a tight bound for this input.';
+    } else {
+      keyInsight = 'No comparisons were saved by sorting for this input. The smallest coin (' + minCoin + ') fits into every amount, so the inner loop always runs to completion. This input represents the worst case: actual operations = theoretical O(n · W) = ' + theoretical + '.';
+    }
+  }
+
+  document.getElementById('ci-condition').innerHTML = condition;
+  document.getElementById('ci-complexity').textContent = complexity;
+  document.getElementById('ci-why').textContent = why;
+  document.getElementById('ci-key-insight').innerHTML = ' ' + keyInsight;
+  document.getElementById('complexity-insight').style.display = 'block';
+}
+
+// =============================================
 // GREEDY vs DP COMPARISON
 // =============================================
 function runComparison() {
@@ -1770,6 +1856,7 @@ function resetAll(redraw) {
     document.getElementById('clo-space').textContent    = '0';
     document.getElementById('compare-row').style.display = 'none';
     document.getElementById('comparison-conclusion').style.display = 'none';
+    document.getElementById('complexity-insight').style.display = 'none';
     document.getElementById('growth-svg').innerHTML = '';
     highlightLine(null); setStatus('Idle'); setButtons('idle');
   }
