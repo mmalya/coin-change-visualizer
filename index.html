@@ -709,6 +709,107 @@
          EDUCATIONAL SECTIONS — Self-Study Content
     ══════════════════════════════════════════ -->
 
+    <!-- SECTION 0: Core Concepts & Theory -->
+    <details class="edu-section" open>
+      <summary>&#127775; Section 0 &#8212; Core Concepts: Algorithms, Paradigms &amp; Complexity</summary>
+      <div class="edu-body">
+
+        <div>
+          <h3>What is an Algorithm?</h3>
+          <p>An algorithm is a finite, step-by-step procedure that takes an input, performs a series of well-defined operations, and produces an output. Every algorithm must eventually stop (terminate) and must produce the correct result for every valid input. Algorithms are the foundation of computer science — before writing any code, we design an algorithm and analyse how efficient it is.</p>
+          <p style="margin-top:8px;">Two algorithms can solve the same problem but have very different performance. For example, both Greedy and Dynamic Programming solve the Coin Change Problem, but DP always finds the minimum while Greedy sometimes gives the wrong answer. Choosing the right algorithm matters enormously in practice.</p>
+        </div>
+
+        <div>
+          <h3>What is a Design Paradigm?</h3>
+          <p>A design paradigm is a general strategy or philosophy for designing algorithms. Rather than solving one specific problem, a paradigm gives you a framework you can apply to many different problems. This course covers several paradigms — this project focuses on two of them: <strong>Dynamic Programming</strong> and <strong>Greedy</strong>.</p>
+          <table class="complexity-table" style="margin-top:10px;">
+            <thead><tr><th>Paradigm</th><th>Core Idea</th><th>When to Use</th><th>Example Problems</th></tr></thead>
+            <tbody>
+              <tr><td><strong>Divide &amp; Conquer</strong></td><td>Split the problem into independent sub-problems, solve each, combine results</td><td>Sub-problems do not overlap</td><td>Merge Sort, Binary Search</td></tr>
+              <tr><td><strong>Greedy</strong></td><td>Make the locally best choice at each step, never backtrack</td><td>Problem has the Greedy Property</td><td>Huffman Coding, Dijkstra's (simple), Fractional Knapsack</td></tr>
+              <tr><td><strong>Dynamic Programming</strong></td><td>Break into overlapping sub-problems, store each answer once, reuse it</td><td>Optimal Substructure + Overlapping Subproblems</td><td>Coin Change, Longest Common Subsequence, 0/1 Knapsack</td></tr>
+              <tr><td><strong>Backtracking</strong></td><td>Try all possibilities, undo bad choices</td><td>Constraint satisfaction, exhaustive search</td><td>N-Queens, Sudoku Solver</td></tr>
+            </tbody>
+          </table>
+        </div>
+
+        <div>
+          <h3>What is Recursion?</h3>
+          <p>Recursion is when a function calls itself to solve a smaller version of the same problem. Every recursive solution has two parts:</p>
+          <ul style="margin-top:8px;">
+            <li><strong>Base case:</strong> The simplest version of the problem that can be solved directly without another recursive call. For Coin Change, the base case is amount = 0 (answer: 0 coins).</li>
+            <li><strong>Recursive case:</strong> The function calls itself with a smaller input, moving toward the base case. For Coin Change, we subtract a coin and call the function on the smaller remaining amount.</li>
+          </ul>
+          <p style="margin-top:8px;">Recursion is elegant and easy to understand, but it can be extremely slow when the same sub-problems are solved repeatedly. This is the exact problem that Dynamic Programming was designed to fix.</p>
+          <div class="highlight-box" style="margin-top:10px;">
+            <strong>Recursive definition of Coin Change:</strong><br/><br/>
+            <code>minCoins(amount) = 1 + min( minCoins(amount - c) ) for each coin c</code><br/>
+            <code>minCoins(0) = 0</code> &nbsp;&nbsp;&larr; base case<br/>
+            <code>minCoins(negative) = &infin;</code> &nbsp;&nbsp;&larr; invalid, ignore<br/><br/>
+            This is correct but exponentially slow without memoisation.
+          </div>
+        </div>
+
+        <div>
+          <h3>What is Dynamic Programming?</h3>
+          <p>Dynamic Programming (DP) was introduced by Richard Bellman in the 1950s. The name "dynamic" was chosen for political reasons — Bellman wanted a name that sounded impressive and could not be criticised. The technique itself is about <strong>remembering answers to sub-problems</strong> so they are never computed more than once.</p>
+          <p style="margin-top:8px;">DP is applicable when a problem has two properties:</p>
+          <div class="info-box" style="margin-top:10px;">
+            <strong>Property 1 — Optimal Substructure:</strong><br/>
+            The optimal solution to the full problem can be constructed from optimal solutions to its sub-problems. In Coin Change: the minimum coins for amount 6 is built from the minimum coins for smaller amounts (like 3, 2, 5). If you had a non-optimal solution for a sub-amount, you could replace it with a better one and improve the overall answer — which means the sub-solutions in any optimal answer must themselves be optimal.<br/><br/>
+            <strong>Property 2 — Overlapping Subproblems:</strong><br/>
+            The same sub-problems appear multiple times during the computation. In Coin Change: the sub-problem "minimum coins for amount 2" is needed when computing amounts 3, 5, and 6. Naive recursion recomputes it every time. DP computes it once, stores the answer, and looks it up in O(1) time whenever needed again.
+          </div>
+          <p style="margin-top:10px;">There are two ways to implement DP:</p>
+          <table class="complexity-table" style="margin-top:8px;">
+            <thead><tr><th>Approach</th><th>Direction</th><th>How It Works</th><th>Memory</th></tr></thead>
+            <tbody>
+              <tr><td><strong>Top-Down (Memoisation)</strong></td><td>Start from the full problem, recurse downward</td><td>Write the recursive function normally, but cache each result in a dictionary. If the same sub-problem is called again, return the cached answer immediately.</td><td>Call stack + cache</td></tr>
+              <tr><td><strong>Bottom-Up (Tabulation)</strong></td><td>Start from the smallest sub-problem, build upward</td><td>Fill a table iteratively from the base case up to the full problem. No recursion, no call stack. This is what this tool implements.</td><td>Table only (O(W))</td></tr>
+            </tbody>
+          </table>
+          <p style="margin-top:8px;">This tool uses the <strong>bottom-up tabulation</strong> approach. The DP table fills from dp[0] = 0 up to dp[W], and the animation shows every single fill operation.</p>
+        </div>
+
+        <div>
+          <h3>What is the Greedy Algorithm?</h3>
+          <p>A Greedy algorithm makes the <strong>locally optimal choice</strong> at each step, hoping that a sequence of locally optimal choices leads to a globally optimal solution. It never revisits or undoes a decision — it is committed to each choice as it is made.</p>
+          <p style="margin-top:8px;">Greedy algorithms are fast and simple, but they only work correctly when the problem has the <strong>Greedy Choice Property</strong> — meaning a locally optimal choice at every step is guaranteed to be part of a globally optimal solution. Not all problems have this property. The Coin Change Problem with arbitrary coin sets does NOT have this property, which is why Greedy fails.</p>
+          <div class="warn-box" style="margin-top:10px;">
+            <strong>Intuition for why Greedy fails:</strong><br/><br/>
+            Imagine you are hiking and want to reach the highest peak. A Greedy hiker always walks uphill — toward the nearest higher ground. This works if there is only one peak. But if there are valleys between peaks, the Greedy hiker might climb a small hill, get stuck, and never reach the true highest peak. DP, by contrast, explores all paths and guarantees finding the true maximum.
+          </div>
+        </div>
+
+        <div>
+          <h3>What is Big-O Notation?</h3>
+          <p>Big-O notation describes how the running time (or memory usage) of an algorithm <strong>grows</strong> as the input size increases. It focuses on the dominant term and ignores constants, because for large inputs, the growth rate matters far more than exact values.</p>
+          <table class="complexity-table" style="margin-top:10px;">
+            <thead><tr><th>Notation</th><th>Name</th><th>Example</th><th>Meaning</th></tr></thead>
+            <tbody>
+              <tr><td><strong>O(1)</strong></td><td>Constant</td><td>Array lookup by index</td><td>Same time regardless of input size</td></tr>
+              <tr><td><strong>O(log n)</strong></td><td>Logarithmic</td><td>Binary search</td><td>Doubles input &rarr; one extra step</td></tr>
+              <tr><td><strong>O(n)</strong></td><td>Linear</td><td>Linear search</td><td>Time grows proportionally with input</td></tr>
+              <tr><td><strong>O(n log n)</strong></td><td>Linearithmic</td><td>Merge Sort, sorting coins</td><td>Slightly worse than linear</td></tr>
+              <tr><td><strong>O(n &middot; W)</strong></td><td>Polynomial</td><td>This DP algorithm</td><td>Grows with both n and W — manageable</td></tr>
+              <tr><td><strong>O(n<sup>W</sup>)</strong></td><td>Exponential</td><td>Naive recursion</td><td>Doubles input &rarr; time squares — unusable for large inputs</td></tr>
+            </tbody>
+          </table>
+          <div class="success-box" style="margin-top:10px;">
+            <strong>Key Rule:</strong> O(1) &lt; O(log n) &lt; O(n) &lt; O(n log n) &lt; O(n &middot; W) &lt; O(n<sup>W</sup>). The further right, the slower the algorithm grows. Always prefer algorithms further to the left when possible.
+          </div>
+        </div>
+
+        <div>
+          <h3>Why Does This Problem Require DP and Not Just Recursion?</h3>
+          <p>The Coin Change Problem can be solved with plain recursion — and it will give the correct answer. But for even moderate inputs, naive recursion becomes impossibly slow. Consider coins = [1, 2, 5] and amount = 30. Naive recursion makes approximately 3<sup>30</sup> = over 200 billion calls. DP makes exactly 3 &times; 30 = 90 operations. That is a difference of over 2 billion times faster.</p>
+          <p style="margin-top:8px;">The recursion tree in this tool makes this concrete and visual. Every orange-dashed node is a computation that DP avoids. The more coins and the larger the amount, the more orange nodes appear — and the more dramatic the speedup DP provides.</p>
+        </div>
+
+      </div>
+    </details>
+
     <!-- SECTION 1: What is the Problem? -->
     <details class="edu-section" open>
       <summary>&#128216; Section 1 &#8212; What is the Coin Change Problem?</summary>
