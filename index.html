@@ -242,10 +242,11 @@
     }
     .pseudo-line.hl { background: var(--code-hl); color: var(--accent); }
     .pseudo-line .tooltip {
-      display: none; position: absolute; left: 100%; top: 0;
-      background: #333; color: #ccc; font-size: 0.72rem; padding: 4px 8px;
-      border-radius: 4px; white-space: nowrap; z-index: 10; margin-left: 8px;
-      border: 1px solid var(--border);
+      display: none; position: absolute; left: 0; top: 100%;
+      background: #1e2a3a; color: #a8d8ea; font-size: 0.78rem; padding: 6px 10px;
+      border-radius: 6px; white-space: normal; max-width: 320px; z-index: 100;
+      margin-top: 4px; border: 1px solid var(--accent); line-height: 1.5;
+      box-shadow: 0 4px 12px rgba(0,0,0,0.4);
     }
     .pseudo-line:hover .tooltip { display: block; }
 
@@ -521,16 +522,16 @@
       <div class="card-title">&#128196; Pseudocode &#8212; DP Algorithm</div>
       <p style="font-size:0.72rem;color:var(--muted);margin-bottom:8px;">The highlighted line shows which part of the code is currently executing. Hover any line for an explanation.</p>
       <div class="pseudo-block" id="pseudo-block">
-        <span class="pseudo-line" data-line="0">CoinChangeDP(coins, amount):<span class="tooltip">Function entry point — takes coin list and target</span></span>
-        <span class="pseudo-line" data-line="1">  sort coins ascending<span class="tooltip">CLO-2: Sorting enables early-exit optimization</span></span>
-        <span class="pseudo-line" data-line="2">  dp[0..amount] = infinity<span class="tooltip">Initialize — infinity means "no solution found yet"</span></span>
-        <span class="pseudo-line" data-line="3">  dp[0] = 0<span class="tooltip">Base case: 0 coins needed to make amount 0</span></span>
-        <span class="pseudo-line" data-line="4">  for i = 1 to amount:<span class="tooltip">Outer loop: solve every sub-amount from 1 to W</span></span>
-        <span class="pseudo-line" data-line="5">    for each coin c in coins:<span class="tooltip">Inner loop: try every coin denomination</span></span>
-        <span class="pseudo-line" data-line="6">      if c &gt; i: break<span class="tooltip">Early exit — coin too large, all remaining are too (sorted)</span></span>
-        <span class="pseudo-line" data-line="7">      if dp[i-c] + 1 &lt; dp[i]:<span class="tooltip">Can we reach amount i better by using coin c?</span></span>
-        <span class="pseudo-line" data-line="8">        dp[i] = dp[i-c] + 1<span class="tooltip">Yes — update dp[i] with the improved solution</span></span>
-        <span class="pseudo-line" data-line="9">  return dp[amount]<span class="tooltip">Final answer: minimum coins for the target amount</span></span>
+        <span class="pseudo-line" data-line="0">CoinChangeDP(coins, amount):<span class="tooltip">Entry point. Takes two inputs: coins (array of denominations) and amount (target integer). Returns the minimum number of coins needed.</span></span>
+        <span class="pseudo-line" data-line="1">  sort coins ascending<span class="tooltip">CLO-2 Optimization: Sort coins smallest to largest. This allows the inner loop to break early — once a coin is too large, all remaining coins are also too large (since they are sorted).</span></span>
+        <span class="pseudo-line" data-line="2">  dp[0..amount] = infinity<span class="tooltip">Create a 1D array of size (amount+1). Set every slot to infinity, meaning "no solution found yet". Space complexity is O(W).</span></span>
+        <span class="pseudo-line" data-line="3">  dp[0] = 0<span class="tooltip">Base case: it takes exactly 0 coins to make amount 0. This is the seed that all other answers build from.</span></span>
+        <span class="pseudo-line" data-line="4">  for i = 1 to amount:<span class="tooltip">Outer loop runs W times — solves every sub-amount from 1 up to the target. This is the first factor in O(n·W) time complexity.</span></span>
+        <span class="pseudo-line" data-line="5">    for each coin c in coins:<span class="tooltip">Inner loop runs up to n times — tries every coin for the current amount i. This is the second factor in O(n·W) time complexity.</span></span>
+        <span class="pseudo-line" data-line="6">      if c &gt; i: break<span class="tooltip">CLO-2 Early Exit: If coin c is larger than amount i, we cannot use it. Since coins are sorted ascending, all remaining coins are also too large — so we break the loop immediately, saving comparisons.</span></span>
+        <span class="pseudo-line" data-line="7">      if dp[i-c] + 1 &lt; dp[i]:<span class="tooltip">Core recurrence: "If I use coin c, I need dp[i-c] coins for the remainder, plus 1 for this coin. Is that total better than what I already have?" This is the Optimal Substructure property of DP.</span></span>
+        <span class="pseudo-line" data-line="8">        dp[i] = dp[i-c] + 1<span class="tooltip">Update dp[i] with the better answer. We reuse the already-computed dp[i-c] — this is the Overlapping Subproblems property that makes DP efficient.</span></span>
+        <span class="pseudo-line" data-line="9">  return dp[amount]<span class="tooltip">Return the last cell of the table. If it is still infinity, no solution exists (return "Impossible"). Otherwise it holds the minimum number of coins needed.</span></span>
       </div>
     </div>
 
